@@ -1,83 +1,96 @@
-# 班级魔方多人GPS自动签到
+# BJMFSign · 班级魔方 GPS 自动签到
 
-- Thanks To [JasonYANG170/AutoCheckBJMF](https://github.com/JasonYANG170/AutoCheckBJMF) ，根据自己学校的签到进行了简化
-- 仅根据自己学校的班级魔方需求更改简化代码,仅支持GPS签到(可在范围外)，其他功能请到项目[AutoCheckBJMF](https://github.com/JasonYANG170/AutoCheckBJMF)项目查看其他内容
+班级魔方（g8n.cn）多人 GPS 自动签到工具。现以 **Android 原生 App** 为主要入口，同时保留原 Python 脚本与 Web 管理端源码。
+
+- 仅支持 GPS 签到（可在范围外），根据自己学校的签到需求进行了简化
 - 可配置多人签到
-- 可配置QQ/WX通知签到情况
-- 如果你觉得好用,`Please Star`orz
-  ![网页端展示](doc/img0.jpg)
-## 代码结构
+- 可配置 QQ / 微信通知签到结果
+- 如果你觉得好用，`Please Star` orz
 
-项目已进行模块化重构，提高了代码的可维护性和可读性：
+![网页端展示](doc/img0.jpg)
 
-```
-BJMF/
-├── BJMF.py                 # 主程序，负责整体流程控制
-├── auto_add_user.py        # 自动添加用户工具，通过微信扫码获取用户信息并写入配置data.json
-├── android-app/            # Android 原生客户端，使用 Miuix / Compose 实现完整签到流程
-├── .env                    # (可选) 环境变量配置文件，用于配置公共参数
-└── utils/                  # 工具模块目录
-    ├── __init__.py         # 模块初始化文件
-    ├── config_manager.py   # 配置文件管理模块
-    ├── user_info.py        # 用户信息获取模块
-    ├── notification.py     # 通知发送模块
-    └── attendance.py       # 签到任务执行模块
-```
+## 致谢
 
-### 各模块职责
-
-- **BJMF.py**: 主程序入口，负责读取配置、遍历用户、调用签到任务
-- **auto_add_user.py**: 自动添加用户工具，通过微信扫码获取用户信息并写入data.json配置文件；支持读取.env公共配置
-- **config_manager.py**: 处理配置文件的读取和保存
-- **user_info.py**: 获取用户信息和班级信息
-- **notification.py**: 处理QQ和微信消息发送
-- **attendance.py**: 执行签到任务的核心逻辑
-- **android-app/**: Android App 工程，主入口为 `com.bjmf.sign.android.MainActivity`，包含扫码登录、任务保存、定时签到、手动签到、日志和通知
+- 本项目基于 [JasonYANG170/AutoCheckBJMF](https://github.com/JasonYANG170/AutoCheckBJMF) 修改简化而来，感谢原作者的工作。
+- 原项目支持更多签到方式与功能，如有需要请前往 [AutoCheckBJMF](https://github.com/JasonYANG170/AutoCheckBJMF) 查看。
 
 ## 功能
 
-- 自动从指定课程中获取签到项
-- 通过模拟表单提交，实现自动签到
-- 签到成功后,发送QQ/WX消息通知(可选配,可以不用配置)
-- 支持通过微信扫码快速添加用户
-- 支持 `.env` 配置公共参数，简化多人配置
-- 新增 Android 原生 App，可在手机端完成原有扫码登录、多人任务、GPS 签到、定时执行、日志查看与 QQ/WX 通知
-
-## 更新说明
-
-- 2026.01.10
-  - `auto_add_user.py` 优化: 支持通过 `.env` 文件配置公共参数(经纬度、通知Key等)，简化配置流程
-  - `auto_add_user.py` 优化: 增加二维码自动清理机制，避免垃圾文件堆积及文件占用问题
-  - `utils/attendance.py` 修复: 优化签到状态检测逻辑，增加对"已签到"状态的HTML解析，解决正则匹配失败导致的误报问题
-
-- 2025.12.15
-  - 更新 `utils/attendance.py` ,改用 requests.Session()防止获取签到项失败问题；同时增加了对 response.url 的检测
-
-- 2025.12.04 v2版本
-  - 新增 `auto_add_user.py` 工具，实现微信扫码自动获取用户信息并写入配置文件data.json
-  - 简化了用户添加流程，无需手动获取Cookie和班级ID
+- 微信扫码登录，自动获取 Cookie 与班级信息
+- 自动从指定课程中获取签到项，模拟表单提交完成 GPS 签到
+- 多人任务管理，按设定时间自动签到，也可手动执行
+- 签到结果通过 QQ（Qmsg酱）/ 微信（Server酱）推送（可选）
+- 本地日志查看
 
 ## Android App（主要入口）
 
-`android-app/` 是新增的 Android 原生客户端，使用 Kotlin + Jetpack Compose + Miuix 组件风格实现主入口、扫码登录、任务配置、自动/手动签到、日志查看和 QQ/WX 通知。App 内部直接移植原 Python/Web 签到逻辑，不依赖 `web_signin` 后端服务。
+`android-app/` 是 Android 原生客户端，使用 Kotlin + Jetpack Compose + Miuix 组件风格，实现扫码登录、任务配置、自动/手动签到、日志查看和 QQ/WX 通知。App 内部直接移植了原 Python/Web 签到逻辑，**不依赖 `web_signin` 后端服务**，也不需要 `data.json` / `.env`。
 
-### 本地运行流程
+### 下载安装
 
-1. 用 Android Studio 打开 `android-app/`。
-2. 运行 `app` 模块到手机或模拟器。
-3. 在 App 内获取二维码，使用微信扫码登录。
-4. 填写经纬度、定位精度、执行时间和通知 Key，保存为本机任务。
-5. App 会通过 Android `AlarmManager` 安排下一次自动签到；也可以在任务页手动执行单个任务，或在“管理”页执行全部已启用任务。
+Release APK 由 GitHub Actions 自动构建：
 
-### 构建说明
+1. 打开仓库的 [Actions → Android Release APK](https://github.com/bai-piao/BJMFSign/actions/workflows/android-release.yml)。
+2. 选择最新一次成功的运行，在页面底部 **Artifacts** 中下载 `BJMFSign-release-apk`（需登录 GitHub）。
+3. 解压得到 `.apk`，传到手机安装（需允许“安装未知来源应用”）。
 
-- Android 主入口：`android-app/app/src/main/java/com/bjmf/sign/android/MainActivity.kt`
-- Miuix 依赖：`top.yukonga.miuix.kmp:miuix-ui:0.9.2`
-- 编译要求：Android SDK Platform 37，`targetSdk` 暂保持 36
+> 每次推送 `android-app/` 相关改动到仓库都会自动构建，也可以在 Actions 页面点击 **Run workflow** 手动触发。
+
+### 使用流程
+
+1. 在 App 内获取二维码，使用微信扫码登录。
+2. 填写经纬度、定位精度、执行时间和通知 Key，保存为本机任务。
+3. App 会通过 Android `AlarmManager` 安排下一次自动签到；也可以在任务页手动执行单个任务，或在“管理”页执行全部已启用任务。
+4. Android 12+ 如限制精确定时，请在系统设置中允许本 App 的闹钟/提醒权限。
+
+### APK 签名
+
+- 未配置签名 Secrets 时，CI 每次会生成临时签名密钥，**不同构建之间签名不同，覆盖安装前需先卸载旧版本**。
+- 如需固定签名（支持直接覆盖升级），在仓库 **Settings → Secrets and variables → Actions** 中添加：
+
+  | Secret | 说明 |
+  | --- | --- |
+  | `RELEASE_KEYSTORE_BASE64` | keystore 文件的 base64 内容（`base64 -w0 release.jks`） |
+  | `RELEASE_STORE_PASSWORD` | keystore 密码 |
+  | `RELEASE_KEY_ALIAS` | key 别名 |
+  | `RELEASE_KEY_PASSWORD` | key 密码 |
+
+  生成 keystore 示例：
+  ```bash
+  keytool -genkeypair -v -keystore release.jks -alias bjmf \
+    -keyalg RSA -keysize 2048 -validity 10000
+  ```
+
+### 本地构建
+
+1. 用 Android Studio 打开 `android-app/`（需 Android SDK Platform 37，JDK 17+）。
+2. 直接运行 `app` 模块到手机或模拟器；或执行 `./gradlew assembleRelease` 构建 release 包。
+3. 本地构建 release 时，若设置了 `RELEASE_STORE_FILE`、`RELEASE_STORE_PASSWORD`、`RELEASE_KEY_ALIAS`、`RELEASE_KEY_PASSWORD` 环境变量则使用该签名，否则回退到本机 debug keystore。
+
+### 关键源码
+
+- 主入口：`android-app/app/src/main/java/com/bjmf/sign/android/MainActivity.kt`
 - 签到网络逻辑：`android-app/app/src/main/java/com/bjmf/sign/android/data/BjmfNativeService.kt`
 - 本地任务与日志：`android-app/app/src/main/java/com/bjmf/sign/android/data/BjmfStore.kt`
 - 定时执行：`android-app/app/src/main/java/com/bjmf/sign/android/data/BjmfScheduler.kt`
-- Android 12+ 如限制精确定时，请在系统设置中允许本 App 的闹钟/提醒权限。
+- UI 依赖：`top.yukonga.miuix.kmp:miuix-ui:0.9.2`；`compileSdk` 37，`targetSdk` 36
+
+## 代码结构
+
+```
+BJMFSign/
+├── android-app/            # Android 原生客户端（主要入口）
+├── .github/workflows/      # GitHub Actions：自动构建 release APK
+├── BJMF.py                 # 旧 Python 脚本主程序，负责整体流程控制
+├── auto_add_user.py        # 微信扫码获取用户信息并写入 data.json
+├── utils/                  # Python 工具模块
+│   ├── config_manager.py   # 配置文件读取与保存
+│   ├── user_info.py        # 用户信息与班级信息获取
+│   ├── notification.py     # QQ / 微信消息发送
+│   └── attendance.py       # 签到任务核心逻辑
+├── web_signin/             # Web 管理端（历史保留）
+└── doc/                    # 文档图片
+```
 
 ## 旧 Python 脚本配置（可选保留）
 
@@ -184,3 +197,22 @@ pip install -r requirements.txt
 
 - 程序会自动检测并填充空的 class 字段。
 - 签到二维码/Cookie 具有时效性，如果签到失败（提示 Cookie 无效），请重新运行 `auto_add_user.py` 更新凭证。
+
+## 更新说明
+
+- 2026.10.09
+  - 新增 GitHub Actions 工作流，自动构建可安装的 release APK
+  - Android release 构建支持通过环境变量 / 仓库 Secrets 配置签名
+  - README 重写为以 Android App 为主
+
+- 2026.01.10
+  - `auto_add_user.py` 优化: 支持通过 `.env` 文件配置公共参数(经纬度、通知Key等)，简化配置流程
+  - `auto_add_user.py` 优化: 增加二维码自动清理机制，避免垃圾文件堆积及文件占用问题
+  - `utils/attendance.py` 修复: 优化签到状态检测逻辑，增加对"已签到"状态的HTML解析，解决正则匹配失败导致的误报问题
+
+- 2025.12.15
+  - 更新 `utils/attendance.py` ,改用 requests.Session()防止获取签到项失败问题；同时增加了对 response.url 的检测
+
+- 2025.12.04 v2版本
+  - 新增 `auto_add_user.py` 工具，实现微信扫码自动获取用户信息并写入配置文件data.json
+  - 简化了用户添加流程，无需手动获取Cookie和班级ID
