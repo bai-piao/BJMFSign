@@ -7,8 +7,6 @@
 - 可配置 QQ / 微信通知签到结果
 - 如果你觉得好用，`Please Star` orz
 
-![网页端展示](doc/img0.jpg)
-
 ## 致谢
 
 - 本项目基于 [JasonYANG170/AutoCheckBJMF](https://github.com/JasonYANG170/AutoCheckBJMF) 修改简化而来，感谢原作者的工作。
@@ -197,22 +195,3 @@ pip install -r requirements.txt
 
 - 程序会自动检测并填充空的 class 字段。
 - 签到二维码/Cookie 具有时效性，如果签到失败（提示 Cookie 无效），请重新运行 `auto_add_user.py` 更新凭证。
-
-## 更新说明
-
-- 2026.10.09
-  - 新增 GitHub Actions 工作流，自动构建可安装的 release APK
-  - Android release 构建支持通过环境变量 / 仓库 Secrets 配置签名
-  - README 重写为以 Android App 为主
-
-- 2026.01.10
-  - `auto_add_user.py` 优化: 支持通过 `.env` 文件配置公共参数(经纬度、通知Key等)，简化配置流程
-  - `auto_add_user.py` 优化: 增加二维码自动清理机制，避免垃圾文件堆积及文件占用问题
-  - `utils/attendance.py` 修复: 优化签到状态检测逻辑，增加对"已签到"状态的HTML解析，解决正则匹配失败导致的误报问题
-
-- 2025.12.15
-  - 更新 `utils/attendance.py` ,改用 requests.Session()防止获取签到项失败问题；同时增加了对 response.url 的检测
-
-- 2025.12.04 v2版本
-  - 新增 `auto_add_user.py` 工具，实现微信扫码自动获取用户信息并写入配置文件data.json
-  - 简化了用户添加流程，无需手动获取Cookie和班级ID
