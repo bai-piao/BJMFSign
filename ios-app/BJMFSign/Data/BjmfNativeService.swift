@@ -314,12 +314,7 @@ final class BjmfNativeService {
             throw BjmfError.message("获取 Cookie 失败：HTTP \(response.code)")
         }
 
-        var fields: [String: String] = [:]
-        for (key, value) in response.headers {
-            if let key = key as? String, let value = value as? String { fields[key] = value }
-        }
-        let cookies = URL(string: url).map { HTTPCookie.cookies(withResponseHeaderFields: fields, for: $0) } ?? []
-        guard let cookie = cookies.first(where: { $0.name != "s" }) else {
+        guard let cookie = client.cookieJar?.all().first(where: { $0.name != "s" }) else {
             throw BjmfError.message("未获取到有效 Cookie")
         }
         return "\(cookie.name)=\(cookie.value)"
