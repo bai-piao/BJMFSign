@@ -27,7 +27,7 @@ jobs:
         run: |
           SDKMANAGER="$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | sort -V | tail -1)"
           yes | "$SDKMANAGER" --licenses > /dev/null || true
-          "$SDKMANAGER" "platforms;android-37"
+          "$SDKMANAGER" --list 2>/dev/null | grep -E '^ *platforms;' | sort -u || true
 
       - uses: gradle/actions/setup-gradle@v4
 
