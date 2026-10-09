@@ -29,7 +29,7 @@
 - **正式版**：在 [Releases](https://github.com/bai-piao/BJMFSign/releases/latest) 下载 `BJMFSign-vX.Y.apk`，传到手机安装（需允许“安装未知来源应用”）。
 - **最新构建**：打开 [Actions → Android Release APK](https://github.com/bai-piao/BJMFSign/actions/workflows/android-release.yml)，选择最新一次成功的运行，在页面底部 **Artifacts** 中下载 `BJMFSign-release-apk`（需登录 GitHub），解压得到 `.apk`。
 
-> 每次推送 `android-app/` 相关改动都会自动构建；推送 `v*` 标签（如 `v1.0`）或在 Actions 中手动运行 **Publish GitHub Release** 会自动发布 Release 并附带 APK。
+> 每次推送 `android-app/` 相关改动都会自动构建；推送 `v*` 标签（如 `v1.0`）或在 Actions 中手动运行 **Publish GitHub Release** 会自动发布 Release 并附带 APK 与 iOS IPA。
 
 ### 使用流程
 
@@ -70,11 +70,19 @@
 - 定时执行：`android-app/app/src/main/java/com/bjmf/sign/android/data/BjmfScheduler.kt`
 - UI 依赖：`top.yukonga.miuix.kmp:miuix-ui:0.9.2`；`compileSdk` 37，`targetSdk` 36
 
+## iOS App
+
+`ios-app/` 是 iOS 原生客户端（SwiftUI，需 iOS 26+），功能与 Android App 一致，界面采用液态玻璃（Liquid Glass）设计。
+
+- **下载**：在 [Releases](https://github.com/bai-piao/BJMFSign/releases/latest) 下载 `BJMFSign-vX.Y-ios-unsigned.ipa`，使用 AltStore / Sideloadly 等工具自签安装；或用 Xcode 26 自行构建（见 [ios-app/README.md](ios-app/README.md)）。
+- **定时签到**：iOS 不允许精确定时后台运行，到点会推送通知，点击通知或通知上的「立即签到」即可执行；系统后台刷新和打开 App 时也会自动补签错过的任务。
+
 ## 代码结构
 
 ```
 BJMFSign/
 ├── android-app/            # Android 原生客户端（主要入口）
+├── ios-app/                # iOS 原生客户端（SwiftUI + Liquid Glass）
 ├── .github/workflows/      # GitHub Actions：自动构建 release APK
 ├── BJMF.py                 # 旧 Python 脚本主程序，负责整体流程控制
 ├── auto_add_user.py        # 微信扫码获取用户信息并写入 data.json
