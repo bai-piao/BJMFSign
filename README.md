@@ -26,13 +26,10 @@
 
 ### 下载安装
 
-Release APK 由 GitHub Actions 自动构建：
+- **正式版**：在 [Releases](https://github.com/bai-piao/BJMFSign/releases/latest) 下载 `BJMFSign-vX.Y.apk`，传到手机安装（需允许“安装未知来源应用”）。
+- **最新构建**：打开 [Actions → Android Release APK](https://github.com/bai-piao/BJMFSign/actions/workflows/android-release.yml)，选择最新一次成功的运行，在页面底部 **Artifacts** 中下载 `BJMFSign-release-apk`（需登录 GitHub），解压得到 `.apk`。
 
-1. 打开仓库的 [Actions → Android Release APK](https://github.com/bai-piao/BJMFSign/actions/workflows/android-release.yml)。
-2. 选择最新一次成功的运行，在页面底部 **Artifacts** 中下载 `BJMFSign-release-apk`（需登录 GitHub）。
-3. 解压得到 `.apk`，传到手机安装（需允许“安装未知来源应用”）。
-
-> 每次推送 `android-app/` 相关改动到仓库都会自动构建，也可以在 Actions 页面点击 **Run workflow** 手动触发。
+> 每次推送 `android-app/` 相关改动都会自动构建；推送 `v*` 标签（如 `v1.0`）或在 Actions 中手动运行 **Publish GitHub Release** 会自动发布 Release 并附带 APK。
 
 ### 使用流程
 
