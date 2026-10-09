@@ -2,6 +2,7 @@ name: iOS Build
 
 on:
   workflow_dispatch:
+  workflow_call:
   push:
     paths:
       - "ios-app/**"

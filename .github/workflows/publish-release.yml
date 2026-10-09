@@ -15,8 +15,11 @@ jobs:
     uses: ./.github/workflows/android-release.yml
     secrets: inherit
 
+  build-ios:
+    uses: ./.github/workflows/ios-build.yml
+
   publish:
-    needs: build
+    needs: [build, build-ios]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -28,12 +31,18 @@ jobs:
           name: BJMFSign-release-apk
           path: apk
 
-      - name: Rename APK
+      - uses: actions/download-artifact@v4
+        with:
+          name: BJMFSign-ios-unsigned-ipa
+          path: ipa
+
+      - name: Rename packages
         run: |
           set -e
           src="$(ls apk/*.apk | head -1)"
           mv "$src" "BJMFSign-${TAG}.apk"
-          ls -l BJMFSign-*.apk
+          mv ipa/BJMFSign-unsigned.ipa "BJMFSign-${TAG}-ios-unsigned.ipa"
+          ls -l BJMFSign-*
 
       - uses: softprops/action-gh-release@v2
         with:
@@ -42,6 +51,10 @@ jobs:
           name: BJMFSign ${{ env.TAG }}
           generate_release_notes: true
           body: |
-            下载 `BJMFSign-${{ env.TAG }}.apk` 直接安装（需允许“安装未知来源应用”）。
+            **Android**：下载 `BJMFSign-${{ env.TAG }}.apk` 直接安装（需允许“安装未知来源应用”）。
             若未配置固定签名 Secrets，本 APK 使用临时签名，从其他版本升级前需先卸载旧版本。
-          files: BJMFSign-${{ env.TAG }}.apk
+
+            **iOS**（需 iOS 26+）：下载 `BJMFSign-${{ env.TAG }}-ios-unsigned.ipa`，使用 AltStore / Sideloadly 等工具自签安装。
+          files: |
+            BJMFSign-${{ env.TAG }}.apk
+            BJMFSign-${{ env.TAG }}-ios-unsigned.ipa
