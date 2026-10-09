@@ -1,0 +1,47 @@
+name: Publish GitHub Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v1.0)"
+        required: true
+
+jobs:
+  build:
+    uses: ./.github/workflows/android-release.yml
+    secrets: inherit
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: BJMFSign-release-apk
+          path: apk
+
+      - name: Rename APK
+        run: |
+          set -e
+          src="$(ls apk/*.apk | head -1)"
+          mv "$src" "BJMFSign-${TAG}.apk"
+          ls -l BJMFSign-*.apk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          target_commitish: ${{ github.sha }}
+          name: BJMFSign ${{ env.TAG }}
+          generate_release_notes: true
+          body: |
+            下载 `BJMFSign-${{ env.TAG }}.apk` 直接安装（需允许“安装未知来源应用”）。
+            若未配置固定签名 Secrets，本 APK 使用临时签名，从其他版本升级前需先卸载旧版本。
+          files: BJMFSign-${{ env.TAG }}.apk
