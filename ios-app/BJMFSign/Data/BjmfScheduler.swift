@@ -17,7 +17,7 @@ final class BjmfScheduler {
     static let catchUpWindow: TimeInterval = 30 * 60
 
     private static let lastAutoRunKey = "last_auto_run"
-    private static let zone = TimeZone(identifier: "Asia/Shanghai")!
+    static let zone = TimeZone(identifier: "Asia/Shanghai")!
 
     private let store: BjmfStore
     private let defaults: UserDefaults
@@ -104,25 +104,28 @@ final class BjmfScheduler {
     // MARK: Time calculation
 
     func nextRun(for task: BjmfTask, now: Date = Date()) -> Date? {
-        let candidates = runDates(for: task, around: now)
-        return candidates.first { $0 > now }
+        Self.nextRun(times: task.times, dateStart: task.dateStart, dateEnd: task.dateEnd, now: now)
     }
 
     func previousRun(for task: BjmfTask, before now: Date) -> Date? {
-        runDates(for: task, around: now).last { $0 <= now }
+        Self.runDates(times: task.times, dateStart: task.dateStart, dateEnd: task.dateEnd, around: now).last { $0 <= now }
+    }
+
+    static func nextRun(times: [String], dateStart: String?, dateEnd: String?, now: Date = Date()) -> Date? {
+        runDates(times: times, dateStart: dateStart, dateEnd: dateEnd, around: now).first { $0 > now }
     }
 
     /// 与 Android 端一致：按北京时间计算，从 max(今天, 开始日期) 起向后最多 370 天，超过结束日期即停止。
-    private func runDates(for task: BjmfTask, around now: Date) -> [Date] {
+    private static func runDates(times rawTimes: [String], dateStart: String?, dateEnd: String?, around now: Date) -> [Date] {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Self.zone
+        calendar.timeZone = zone
 
-        let times = task.times.compactMap(Self.parseTime).sorted { ($0.0, $0.1, $0.2) < ($1.0, $1.1, $1.2) }
+        let times = rawTimes.compactMap(parseTime).sorted { ($0.0, $0.1, $0.2) < ($1.0, $1.1, $1.2) }
         guard !times.isEmpty else { return [] }
 
         let today = calendar.startOfDay(for: now)
-        let startDate = task.dateStart.flatMap { Self.parseDate($0, calendar: calendar) }
-        let endDate = task.dateEnd.flatMap { Self.parseDate($0, calendar: calendar) }
+        let startDate = dateStart.flatMap { parseDate($0, calendar: calendar) }
+        let endDate = dateEnd.flatMap { parseDate($0, calendar: calendar) }
         let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
         let firstDate = max(yesterday, startDate ?? yesterday)
 

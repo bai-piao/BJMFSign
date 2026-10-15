@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas as AndroidCanvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Color as AndroidColor
 import android.graphics.Paint
 import android.graphics.Path as AndroidPath
@@ -75,6 +77,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -94,6 +97,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bjmf.sign.android.BjmfScreen
 import com.bjmf.sign.android.BjmfUiState
 import com.bjmf.sign.android.BjmfViewModel
+import com.bjmf.sign.android.data.BjmfStore
 import com.bjmf.sign.android.data.BjmfTask
 import com.bjmf.sign.android.data.FavoriteLocation
 import com.bjmf.sign.android.data.TaskForm
@@ -108,6 +112,7 @@ import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -137,7 +142,7 @@ fun BjmfApp(viewModel: BjmfViewModel = viewModel()) {
             }
     }
 
-    BjmfMiuixTheme(keyColor = Color(state.accentColor)) {
+    BjmfMiuixTheme(keyColor = Color(state.accentColor), themeMode = state.themeMode) {
         Scaffold { padding ->
             Box(
                 modifier = Modifier
@@ -517,105 +522,34 @@ private fun UserCard(user: UserInfo) {
 }
 
 @Composable
-private fun TaskScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
-    if (state.tasks.isNotEmpty()) {
-        TaskListCard(
-            tasks = state.tasks,
-            selectedTaskId = state.selectedTaskId,
-            onSelect = viewModel::selectTask,
-            onToggle = viewModel::toggleTask,
-        )
-    }
-
-    TaskFormCard(
-        form = state.taskForm,
-        favoriteLocations = state.favoriteLocations,
-        isBusy = state.isBusy,
-        hasSelectedTask = state.selectedTaskId != null,
-        onFormChange = viewModel::updateTaskForm,
-        onUseCurrentLocationAndFavorite = viewModel::useCurrentLocationAndFavorite,
-        onFavoriteSelectedLocation = viewModel::favoriteSelectedLocation,
-        onUseFavoriteLocation = viewModel::useFavoriteLocation,
-        onDeleteFavoriteLocation = viewModel::deleteFavoriteLocation,
-        onLocationPermissionDenied = viewModel::locationPermissionDenied,
-        onSave = viewModel::saveTask,
-        onDelete = viewModel::deleteSelectedTask,
-        onRunNow = viewModel::runSelectedNow,
-        onNewFromAccount = viewModel::newTaskFromAccount,
-    )
-}
-
-@Composable
-private fun TaskListCard(
-    tasks: List<BjmfTask>,
-    selectedTaskId: Long?,
-    onSelect: (BjmfTask) -> Unit,
-    onToggle: (BjmfTask) -> Unit,
-) {
-    SectionCard("本机任务") {
-        tasks.forEachIndexed { index, task ->
-            TaskRow(
-                task = task,
-                selected = task.id == selectedTaskId,
-                onSelect = { onSelect(task) },
-                onToggle = { onToggle(task) },
-            )
-            if (index != tasks.lastIndex) {
-                ListDivider()
-            }
-        }
-    }
-}
-
-@Composable
-private fun TaskRow(
-    task: BjmfTask,
-    selected: Boolean,
-    onSelect: () -> Unit,
-    onToggle: () -> Unit,
-) {
-    val dateRange = listOfNotNull(task.dateStart, task.dateEnd)
-        .filter { it.isNotBlank() }
-        .joinToString(" - ")
-    val summary = buildList {
-        add(task.times.joinToString(", ").ifBlank { "未设置执行时间" })
-        add("${task.lng}, ${task.lat}  acc=${task.acc}")
-        if (dateRange.isNotBlank()) add(dateRange)
-    }.joinToString("\n")
-
-    PreferenceRow(
-        title = "${task.name} / ${task.classId}",
-        summary = summary,
-        selected = selected,
-        indicatorColor = if (task.enabled) Color(0xFF24C96B) else MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.5f),
-        onClick = onSelect,
-        action = {
-            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                TextButton(text = "编辑", onClick = onSelect)
-                TextButton(text = if (task.enabled) "停用" else "启用", onClick = onToggle)
-            }
-        },
-    )
-}
-
-@Composable
-private fun SectionCard(
+internal fun SectionCard(
     title: String,
     modifier: Modifier = Modifier,
+    action: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
         insideMargin = PaddingValues(16.dp),
     ) {
-        Text(title, style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.SemiBold)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                title,
+                style = MiuixTheme.textStyles.title3,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            action?.invoke()
+        }
         Spacer(modifier = Modifier.height(8.dp))
         content()
     }
 }
 
 @Composable
-private fun PreferenceRow(
+internal fun PreferenceRow(
     title: String,
     summary: String? = null,
     value: String? = null,
@@ -678,147 +612,12 @@ private fun PreferenceRow(
 }
 
 @Composable
-private fun ListDivider() {
+internal fun ListDivider() {
     HorizontalDivider(modifier = Modifier.padding(start = 20.dp))
 }
 
 @Composable
-private fun TaskFormCard(
-    form: TaskForm,
-    favoriteLocations: List<FavoriteLocation>,
-    isBusy: Boolean,
-    hasSelectedTask: Boolean,
-    onFormChange: (TaskForm) -> Unit,
-    onUseCurrentLocationAndFavorite: () -> Unit,
-    onFavoriteSelectedLocation: () -> Unit,
-    onUseFavoriteLocation: (FavoriteLocation) -> Unit,
-    onDeleteFavoriteLocation: (FavoriteLocation) -> Unit,
-    onLocationPermissionDenied: () -> Unit,
-    onSave: () -> Unit,
-    onDelete: () -> Unit,
-    onRunNow: () -> Unit,
-    onNewFromAccount: () -> Unit,
-) {
-    SectionCard(
-        title = if (hasSelectedTask) "编辑签到任务" else "新建签到任务",
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            TextField(
-                value = form.name,
-                onValueChange = { onFormChange(form.copy(name = it)) },
-                label = "姓名",
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-            TextField(
-                value = form.classId,
-                onValueChange = { onFormChange(form.copy(classId = it)) },
-                label = "班级 ID",
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        MapCoordinatePicker(
-            coord = form.coord,
-            favoriteLocations = favoriteLocations,
-            isBusy = isBusy,
-            onCoordinateSelected = { lat, lng ->
-                onFormChange(form.copy(coord = "%.6f %.6f".format(Locale.US, lng, lat)))
-            },
-            onUseCurrentLocationAndFavorite = onUseCurrentLocationAndFavorite,
-            onFavoriteSelectedLocation = onFavoriteSelectedLocation,
-            onUseFavoriteLocation = onUseFavoriteLocation,
-            onDeleteFavoriteLocation = onDeleteFavoriteLocation,
-            onLocationPermissionDenied = onLocationPermissionDenied,
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        TextField(
-            value = form.acc,
-            onValueChange = { onFormChange(form.copy(acc = it)) },
-            label = "定位精度",
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        TextField(
-            value = form.timesText,
-            onValueChange = { onFormChange(form.copy(timesText = it)) },
-            label = "执行时间",
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            TextField(
-                value = form.dateStart,
-                onValueChange = { onFormChange(form.copy(dateStart = it)) },
-                label = "开始日期",
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-            TextField(
-                value = form.dateEnd,
-                onValueChange = { onFormChange(form.copy(dateEnd = it)) },
-                label = "结束日期",
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        TextField(
-            value = form.cookie,
-            onValueChange = { onFormChange(form.copy(cookie = it)) },
-            label = "Cookie",
-            maxLines = 3,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        TextField(
-            value = form.wxKey,
-            onValueChange = { onFormChange(form.copy(wxKey = it)) },
-            label = "微信通知 Key",
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        TextField(
-            value = form.qqKey,
-            onValueChange = { onFormChange(form.copy(qqKey = it)) },
-            label = "Qmsg Key",
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(
-                onClick = onSave,
-                enabled = !isBusy,
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColorsPrimary(),
-            ) {
-                Text("保存")
-            }
-            TextButton(text = "用扫码账号", onClick = onNewFromAccount, enabled = !isBusy)
-        }
-        if (hasSelectedTask) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
-                    onClick = onRunNow,
-                    enabled = !isBusy,
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text("立即签到")
-                }
-                TextButton(text = "删除任务", onClick = onDelete, enabled = !isBusy)
-            }
-        }
-    }
-}
-
-@Composable
-private fun MapCoordinatePicker(
+internal fun MapCoordinatePicker(
     coord: String,
     favoriteLocations: List<FavoriteLocation>,
     isBusy: Boolean,
@@ -854,7 +653,7 @@ private fun MapCoordinatePicker(
         }
     }
 
-    Text("签到位置", fontWeight = FontWeight.SemiBold)
+    FormSectionTitle("签到位置")
     Text(
         text = selected?.let { "已选择：经度 ${it.second.toCoordText()}，纬度 ${it.first.toCoordText()}" } ?: "点击地图选择签到点",
         color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
@@ -930,17 +729,20 @@ private fun NativeMapPicker(
     onCoordinateSelected: (Double, Double) -> Unit,
 ) {
     val latestOnSelected by rememberUpdatedState(onCoordinateSelected)
+    val dark = MiuixTheme.colorScheme.background.luminance() < 0.5f
 
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { context ->
             AmapTileView(context).apply {
                 onPointSelected = { lat, lng -> latestOnSelected(lat, lng) }
+                setDarkMode(dark)
                 setPoint(initialLat, initialLng, hasSelection)
             }
         },
         update = { mapView ->
             mapView.onPointSelected = { lat, lng -> latestOnSelected(lat, lng) }
+            mapView.setDarkMode(dark)
             mapView.setPoint(initialLat, initialLng, hasSelection)
         },
     )
@@ -979,6 +781,17 @@ private class AmapTileView(context: Context) : View(context) {
     private val markerInnerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = AndroidColor.WHITE
         style = Paint.Style.FILL
+    }
+    private var darkMode = false
+
+    /** 深色模式：反色 + 色相旋转 180°，得到保留原色相的暗色底图。 */
+    fun setDarkMode(dark: Boolean) {
+        if (dark == darkMode) return
+        darkMode = dark
+        tilePaint.colorFilter = if (dark) ColorMatrixColorFilter(NIGHT_MATRIX) else null
+        placeholderPaint.color = if (dark) AndroidColor.rgb(36, 38, 42) else AndroidColor.rgb(232, 236, 240)
+        gridPaint.color = if (dark) AndroidColor.argb(70, 90, 96, 104) else AndroidColor.argb(70, 160, 168, 176)
+        invalidate()
     }
 
     private val scaleDetector = ScaleGestureDetector(
@@ -1127,6 +940,26 @@ private class AmapTileView(context: Context) : View(context) {
     }
 
     companion object {
+        private val NIGHT_MATRIX = ColorMatrix(
+            floatArrayOf(
+                -1f, 0f, 0f, 0f, 255f,
+                0f, -1f, 0f, 0f, 255f,
+                0f, 0f, -1f, 0f, 255f,
+                0f, 0f, 0f, 1f, 0f,
+            ),
+        ).apply {
+            postConcat(
+                ColorMatrix(
+                    floatArrayOf(
+                        -0.574f, 1.430f, 0.144f, 0f, 0f,
+                        0.426f, 0.430f, 0.144f, 0f, 0f,
+                        0.426f, 1.430f, -0.856f, 0f, 0f,
+                        0f, 0f, 0f, 1f, 0f,
+                    ),
+                ),
+            )
+            postConcat(ColorMatrix().apply { setScale(0.85f, 0.85f, 0.9f, 1f) })
+        }
         private const val TILE_SIZE = 256
         private const val MIN_ZOOM = 4
         private const val MAX_ZOOM = 18
@@ -1186,74 +1019,6 @@ private object AmapTileCache {
 }
 
 @Composable
-private fun LogsScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
-    SectionCard("日志") {
-        PreferenceRow(
-            title = "本机执行日志",
-            summary = "正文完整显示，可长按选择复制",
-            value = "${state.logs.size} 条",
-            action = {
-                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    TextButton(
-                        text = "刷新",
-                        onClick = viewModel::refreshLocalData,
-                        enabled = !state.isBusy,
-                    )
-                    TextButton(
-                        text = "清除",
-                        onClick = viewModel::clearLogs,
-                        enabled = !state.isBusy && state.logs.isNotEmpty(),
-                    )
-                }
-            },
-        )
-    }
-
-    if (state.logs.isEmpty()) {
-        EmptyHint("暂无执行日志")
-    } else {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            state.logs.forEach { LogCard(it) }
-        }
-    }
-}
-
-@Composable
-private fun LogCard(log: TaskLog) {
-    val statusColor = when (log.status) {
-        "success", "already_signed" -> Color(0xFF24C96B)
-        "not_started", "no_sign_in", "skip" -> Color(0xFFDA8B00)
-        else -> Color(0xFFE5484D)
-    }
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        insideMargin = PaddingValues(16.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = statusLabel(log.status),
-                color = statusColor,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = formatTime(log.runAt),
-                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-            )
-        }
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = log.taskName,
-            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        SelectionContainer {
-            Text(text = log.message)
-        }
-    }
-}
-
-@Composable
 private fun ManageScreen(
     state: BjmfUiState,
     viewModel: BjmfViewModel,
@@ -1285,6 +1050,11 @@ private fun ManageScreen(
         }
     }
 
+    AppearanceSection(
+        themeMode = state.themeMode,
+        onSelect = viewModel::setThemeMode,
+    )
+
     ThemeColorSection(
         accentColor = state.accentColor,
         accentColorText = state.accentColorText,
@@ -1297,6 +1067,27 @@ private fun ManageScreen(
         PreferenceRow(
             title = "本机私有存储",
             summary = "任务 Cookie、坐标和通知 Key 均保存在本机 App 私有存储中。卸载 App 会清除这些数据。",
+        )
+    }
+}
+
+@Composable
+private fun AppearanceSection(
+    themeMode: String,
+    onSelect: (String) -> Unit,
+) {
+    val modes = listOf(BjmfStore.THEME_SYSTEM, BjmfStore.THEME_LIGHT, BjmfStore.THEME_DARK)
+    SectionCard("外观") {
+        Text(
+            text = "深色模式可跟随系统，或固定为浅色 / 深色",
+            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        TabRowWithContour(
+            tabs = listOf("跟随系统", "浅色", "深色"),
+            selectedTabIndex = modes.indexOf(themeMode).coerceAtLeast(0),
+            onTabSelected = { index -> onSelect(modes[index]) },
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -1381,7 +1172,7 @@ private fun ColorSwatch(
 }
 
 @Composable
-private fun EmptyHint(text: String) {
+internal fun EmptyHint(text: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         insideMargin = PaddingValues(18.dp),
@@ -1428,7 +1219,7 @@ private fun QrCodeImage(dataUrl: String, modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MiuixTheme.colorScheme.surfaceContainer, RoundedCornerShape(8.dp))
+                    .background(Color.White, RoundedCornerShape(8.dp))
                     .padding(18.dp),
             ) {
                 Image(
@@ -1451,7 +1242,7 @@ private fun screenLargeTitle(screen: BjmfScreen): String {
     }
 }
 
-private fun statusLabel(status: String): String {
+internal fun statusLabel(status: String): String {
     return when (status) {
         "success" -> "成功"
         "already_signed" -> "已签到"
@@ -1463,7 +1254,7 @@ private fun statusLabel(status: String): String {
     }
 }
 
-private fun formatTime(millis: Long): String {
+internal fun formatTime(millis: Long): String {
     return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(Date(millis))
 }
 

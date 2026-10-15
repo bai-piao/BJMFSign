@@ -17,6 +17,7 @@ import com.bjmf.sign.android.data.FavoriteLocation
 import com.bjmf.sign.android.data.LoginAccount
 import com.bjmf.sign.android.data.TaskForm
 import com.bjmf.sign.android.data.TaskLog
+import com.bjmf.sign.android.data.normalizeTimes
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,6 +53,7 @@ data class BjmfUiState(
     val selectedTaskId: Long? = null,
     val accentColor: Long = BjmfStore.DEFAULT_ACCENT_COLOR,
     val accentColorText: String = BjmfStore.DEFAULT_ACCENT_COLOR.toHexColor(),
+    val themeMode: String = BjmfStore.THEME_SYSTEM,
     val message: String? = null,
 )
 
@@ -70,6 +72,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
             favoriteLocations = store.loadFavoriteLocations(),
             accentColor = store.loadAccentColor(),
             accentColorText = store.loadAccentColor().toHexColor(),
+            themeMode = store.loadThemeMode(),
         ),
     )
     val uiState: StateFlow<BjmfUiState> = _uiState.asStateFlow()
@@ -241,6 +244,36 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
         }
         reloadLocalData(selectedTaskId = saved.id)
         _uiState.update { it.copy(message = if (saved.enabled) "任务已启用" else "任务已停用") }
+    }
+
+    fun startNewTask() {
+        _uiState.update {
+            it.copy(
+                selectedTaskId = null,
+                taskForm = accountFormOrEmpty(it.account),
+                screen = BjmfScreen.Task,
+                message = if (it.account == null) "新建任务：请填写信息或先扫码登录" else "新建任务：已填入当前扫码账号",
+            )
+        }
+    }
+
+    fun runTaskNow(task: BjmfTask) {
+        val latest = store.findTask(task.id) ?: return
+        runTasksNow(listOf(latest), summary = false)
+    }
+
+    fun setThemeMode(mode: String) {
+        store.saveThemeMode(mode)
+        _uiState.update {
+            it.copy(
+                themeMode = mode,
+                message = when (mode) {
+                    BjmfStore.THEME_LIGHT -> "已切换为浅色模式"
+                    BjmfStore.THEME_DARK -> "已切换为深色模式"
+                    else -> "已设为跟随系统"
+                },
+            )
+        }
     }
 
     fun runSelectedNow() {
@@ -528,21 +561,6 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
         val second = parts[1].toDoubleOrNull() ?: return null
         val (lat, lng) = normalizeCoordPair(first, second) ?: return null
         return lat.toCoordText() to lng.toCoordText()
-    }
-
-    private fun normalizeTimes(raw: String): List<String> {
-        return raw
-            .split(Regex("[,，\\n\\s]+"))
-            .mapNotNull { item ->
-                val parts = item.trim().split(":")
-                if (parts.size !in 2..3) return@mapNotNull null
-                val hour = parts.getOrNull(0)?.toIntOrNull() ?: return@mapNotNull null
-                val minute = parts.getOrNull(1)?.toIntOrNull() ?: return@mapNotNull null
-                val second = parts.getOrNull(2)?.toIntOrNull() ?: 0
-                if (hour !in 0..23 || minute !in 0..59 || second !in 0..59) return@mapNotNull null
-                "%02d:%02d:%02d".format(hour, minute, second)
-            }
-            .distinct()
     }
 
     private fun BjmfTask.toForm(): TaskForm {

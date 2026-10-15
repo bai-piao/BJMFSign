@@ -51,6 +51,7 @@ final class BjmfViewModel {
     var selectedTaskId: Int64?
     var accentColor: Int64 = BjmfStore.defaultAccentColor
     var accentColorText = ColorHex.text(BjmfStore.defaultAccentColor)
+    var themeMode = "system"
     var message: String?
 
     let store: BjmfStore
@@ -71,10 +72,42 @@ final class BjmfViewModel {
         favoriteLocations = store.loadFavoriteLocations()
         accentColor = store.loadAccentColor()
         accentColorText = ColorHex.text(accentColor)
+        themeMode = store.loadThemeMode()
         scheduler.scheduleAll(tasks)
     }
 
     var accent: Color { ColorHex.color(accentColor) }
+
+    /// nil 表示跟随系统。
+    var preferredColorScheme: ColorScheme? {
+        switch themeMode {
+        case "light": return .light
+        case "dark": return .dark
+        default: return nil
+        }
+    }
+
+    func setThemeMode(_ mode: String) {
+        store.saveThemeMode(mode)
+        themeMode = mode
+        switch mode {
+        case "light": message = "已切换为浅色模式"
+        case "dark": message = "已切换为深色模式"
+        default: message = "已设为跟随系统"
+        }
+    }
+
+    func startNewTask() {
+        selectedTaskId = nil
+        taskForm = accountFormOrEmpty(account)
+        screen = .task
+        message = account == nil ? "新建任务：请填写信息或先扫码登录" : "新建任务：已填入当前扫码账号"
+    }
+
+    func runTaskNow(_ task: BjmfTask) {
+        guard let latest = store.findTask(task.id) else { return }
+        runTasksNow([latest], summary: false)
+    }
     var enabledCount: Int { tasks.filter(\.enabled).count }
 
     func selectScreen(_ screen: BjmfScreen) {

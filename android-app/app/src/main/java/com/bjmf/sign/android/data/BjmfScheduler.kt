@@ -5,10 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
 
 class BjmfScheduler(private val context: Context) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -26,7 +22,7 @@ class BjmfScheduler(private val context: Context) {
     fun schedule(task: BjmfTask) {
         cancel(task.id)
         if (!task.enabled) return
-        val nextRunAt = nextRunMillis(task) ?: return
+        val nextRunAt = task.nextRunMillis() ?: return
         val pendingIntent = taskPendingIntent(task.id, PendingIntent.FLAG_UPDATE_CURRENT)
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
@@ -65,30 +61,6 @@ class BjmfScheduler(private val context: Context) {
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE,
         )
-    }
-
-    private fun nextRunMillis(task: BjmfTask, nowMillis: Long = System.currentTimeMillis()): Long? {
-        val zone = ZoneId.of("Asia/Shanghai")
-        val now = LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(nowMillis), zone)
-        val startDate = task.dateStart?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-        val endDate = task.dateEnd?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-        val times = task.times
-            .mapNotNull { runCatching { LocalTime.parse(it) }.getOrNull() }
-            .sorted()
-        if (times.isEmpty()) return null
-
-        val firstDate = listOfNotNull(now.toLocalDate(), startDate).maxOrNull() ?: now.toLocalDate()
-        for (offset in 0..370) {
-            val date = firstDate.plusDays(offset.toLong())
-            if (endDate != null && date.isAfter(endDate)) return null
-            for (time in times) {
-                val candidate = LocalDateTime.of(date, time)
-                if (candidate.isAfter(now)) {
-                    return candidate.atZone(zone).toInstant().toEpochMilli()
-                }
-            }
-        }
-        return null
     }
 
     private fun Long.toRequestCode(): Int = (this xor (this ushr 32)).toInt()
