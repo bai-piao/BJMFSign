@@ -6,7 +6,10 @@ struct GlassBackground: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        let base: Color = colorScheme == .dark ? .black : Color(.systemGroupedBackground)
+        let dark = colorScheme == .dark
+        let base: Color = dark ? .black : Color(.systemGroupedBackground)
+        // 深色模式下降低渐变强度，避免背景过亮。
+        let k = dark ? 0.6 : 1.0
         MeshGradient(
             width: 3,
             height: 3,
@@ -16,9 +19,9 @@ struct GlassBackground: View {
                 [0, 1], [0.5, 1], [1, 1],
             ],
             colors: [
-                accent.opacity(0.55), accent.opacity(0.25), .purple.opacity(0.25),
-                base, accent.opacity(0.18), .cyan.opacity(0.2),
-                base, base, accent.opacity(0.22),
+                accent.opacity(0.55 * k), accent.opacity(0.25 * k), .purple.opacity(0.25 * k),
+                base, accent.opacity(0.18 * k), .cyan.opacity(0.2 * k),
+                base, base, accent.opacity(0.22 * k),
             ]
         )
         .background(base)
@@ -161,5 +164,140 @@ enum DateText {
 
     static func format(millis: Int64) -> String {
         formatter.string(from: Date(timeIntervalSince1970: TimeInterval(millis) / 1000))
+    }
+}
+
+/// 表单分组标题。
+struct SectionHeader: View {
+    let text: String
+
+    init(_ text: String) {
+        self.text = text
+    }
+
+    var body: some View {
+        Text(text)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.tint)
+    }
+}
+
+struct SectionSpacer: View {
+    var body: some View {
+        Spacer().frame(height: 8)
+    }
+}
+
+/// 自动换行的横向排布（用于时间标签等）。
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 6
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let maxWidth = proposal.width ?? .infinity
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        var rowHeight: CGFloat = 0
+        var usedWidth: CGFloat = 0
+        for view in subviews {
+            let size = view.sizeThatFits(.unspecified)
+            if x > 0 && x + size.width > maxWidth {
+                x = 0
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+            x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
+            usedWidth = max(usedWidth, x - spacing)
+        }
+        return CGSize(width: proposal.width ?? usedWidth, height: y + rowHeight)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var x = bounds.minX
+        var y = bounds.minY
+        var rowHeight: CGFloat = 0
+        for view in subviews {
+            let size = view.sizeThatFits(.unspecified)
+            if x > bounds.minX && x + size.width > bounds.maxX {
+                x = bounds.minX
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+            view.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+            x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
+        }
+    }
+}
+
+/// 下次执行时间、日期范围等展示文案（北京时间）。
+enum NextRunText {
+    private static var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = BjmfScheduler.zone
+        return calendar
+    }
+
+    private static func formatter(_ format: String) -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.timeZone = BjmfScheduler.zone
+        formatter.dateFormat = format
+        return formatter
+    }
+
+    static func label(times: [String], dateStart: String?, dateEnd: String?, enabled: Bool) -> String {
+        if !enabled { return "已停用" }
+        if times.isEmpty { return "未设置执行时间" }
+        guard let next = BjmfScheduler.nextRun(times: times, dateStart: dateStart, dateEnd: dateEnd) else {
+            return "已过生效日期，不再执行"
+        }
+        let time = formatter("HH:mm").string(from: next)
+        let day: String
+        if calendar.isDateInToday(next) {
+            day = "今天 \(time)"
+        } else if calendar.isDateInTomorrow(next) {
+            day = "明天 \(time)"
+        } else {
+            day = formatter("MM-dd HH:mm").string(from: next)
+        }
+        return "下次执行：\(day)"
+    }
+
+    static func shortTime(_ time: String) -> String {
+        time.count == 8 && time.hasSuffix(":00") ? String(time.prefix(5)) : time
+    }
+
+    static func dateRange(start: String?, end: String?) -> String? {
+        let s = start?.trimmed.nilIfEmpty
+        let e = end?.trimmed.nilIfEmpty
+        switch (s, e) {
+        case (nil, nil): return nil
+        case let (s?, e?): return "\(s) 至 \(e)"
+        case let (s?, nil): return "\(s) 起"
+        case let (nil, e?): return "至 \(e)"
+        }
+    }
+
+    static func dateString(_ date: Date) -> String {
+        formatter("yyyy-MM-dd").string(from: date)
+    }
+
+    static func date(from text: String) -> Date? {
+        formatter("yyyy-MM-dd").date(from: text.trimmed)
+    }
+
+    static func dayLabel(_ date: Date) -> String {
+        if calendar.isDateInToday(date) { return "今天" }
+        if calendar.isDateInYesterday(date) { return "昨天" }
+        return formatter("M月d日 EEEE").string(from: date)
+    }
+
+    static func dayKey(_ date: Date) -> String {
+        formatter("yyyy-MM-dd").string(from: date)
+    }
+
+    static func timeOnly(_ date: Date) -> String {
+        formatter("HH:mm:ss").string(from: date)
     }
 }

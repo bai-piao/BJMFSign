@@ -39,6 +39,21 @@ struct SettingsView: View {
             .padding(.top, 6)
         }
 
+        GlassCard(title: "外观") {
+            Text("深色模式可跟随系统，或固定为浅色 / 深色")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Picker("外观", selection: Binding(
+                get: { viewModel.themeMode },
+                set: { viewModel.setThemeMode($0) }
+            )) {
+                Text("跟随系统").tag("system")
+                Text("浅色").tag("light")
+                Text("深色").tag("dark")
+            }
+            .pickerStyle(.segmented)
+        }
+
         GlassCard(title: "界面取色") {
             PreferenceRow(
                 title: "当前主题色",

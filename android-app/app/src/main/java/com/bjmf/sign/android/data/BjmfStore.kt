@@ -75,6 +75,12 @@ class BjmfStore(context: Context) {
         prefs.edit().putLong(KEY_ACCENT_COLOR, color).apply()
     }
 
+    fun loadThemeMode(): String = prefs.getString(KEY_THEME_MODE, THEME_SYSTEM) ?: THEME_SYSTEM
+
+    fun saveThemeMode(mode: String) {
+        prefs.edit().putString(KEY_THEME_MODE, mode).apply()
+    }
+
     fun appendLog(log: TaskLog) {
         val logs = loadLogs(limit = Int.MAX_VALUE).toMutableList()
         logs.add(0, log)
@@ -210,6 +216,10 @@ class BjmfStore(context: Context) {
         private const val KEY_LOGS = "logs"
         private const val KEY_FAVORITE_LOCATIONS = "favorite_locations"
         private const val KEY_ACCENT_COLOR = "accent_color"
+        private const val KEY_THEME_MODE = "theme_mode"
+        const val THEME_SYSTEM = "system"
+        const val THEME_LIGHT = "light"
+        const val THEME_DARK = "dark"
         private const val MAX_LOGS = 300
     }
 }

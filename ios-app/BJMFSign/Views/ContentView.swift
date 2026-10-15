@@ -22,6 +22,7 @@ struct ContentView: View {
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .tint(viewModel.accent)
+        .preferredColorScheme(viewModel.preferredColorScheme)
     }
 
     private func page<Content: View>(_ screen: BjmfScreen, @ViewBuilder content: () -> Content) -> some View {

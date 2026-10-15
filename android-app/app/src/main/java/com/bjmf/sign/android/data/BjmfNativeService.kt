@@ -234,16 +234,13 @@ class BjmfNativeService {
     }
 
     private fun logHeader(log: (String) -> Unit, task: BjmfTask, userName: String, classId: String) {
-        log("==================${currentTime()}===================")
-        log("=========== 用户和班级信息 ===============")
+        log("执行时间: ${currentTime()}")
         log("任务 ID: ${task.id}")
         log("用户姓名: $userName")
         log("班级标识: $classId")
-        log("=========== 位置信息 ===============")
         log("纬度(lat): ${task.lat}")
         log("经度(lng): ${task.lng}")
         log("精度(acc): ${task.acc}")
-        log("=========== 签到结果 ===============")
     }
 
     private fun parseClassInfo(html: String): ClassInfo {

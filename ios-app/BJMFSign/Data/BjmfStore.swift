@@ -13,6 +13,7 @@ final class BjmfStore {
     private static let keyLogs = "logs"
     private static let keyFavoriteLocations = "favorite_locations"
     private static let keyAccentColor = "accent_color"
+    private static let keyThemeMode = "theme_mode"
     private static let maxLogs = 300
 
     init(defaults: UserDefaults = .standard) {
@@ -95,6 +96,16 @@ final class BjmfStore {
 
     func saveAccentColor(_ color: Int64) {
         defaults.set(Int(color), forKey: Self.keyAccentColor)
+    }
+
+    // MARK: Appearance
+
+    func loadThemeMode() -> String {
+        defaults.string(forKey: Self.keyThemeMode) ?? "system"
+    }
+
+    func saveThemeMode(_ mode: String) {
+        defaults.set(mode, forKey: Self.keyThemeMode)
     }
 
     // MARK: Logs
