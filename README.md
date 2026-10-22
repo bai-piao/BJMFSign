@@ -21,8 +21,13 @@
 - **地图选点**：在地图上点选签到位置，或一键定位当前位置；常用位置可收藏
 - **定时签到**：按设定时间自动执行，也可单个立即签到或一键执行全部
 - **结果推送**：支持 [Qmsg酱](https://qmsg.zendee.cn/)（QQ）和 [Server酱](https://sct.ftqq.com/)（微信），批量执行时额外推送汇总
-- **执行日志**：按状态 / 任务筛选、按日期分组，展开查看结构化详情并一键复制（保留最近 300 条）
-- **外观**：深色模式（跟随系统 / 浅色 / 深色），预设色板或自定义 HEX 主题色
+- **首次引导**：三步完成扫码登录、通知权限和后台运行设置（Android：电池优化 / 闹钟权限；iOS：后台 App 刷新），顶部显示进度
+- **执行日志**：日历热力图按天展示成功 / 失败，点某一天展开当天详情；失败记录给出可读原因，并可「复制给开发者」（自动隐藏姓名和精确坐标）；也可按状态 / 任务筛选（保留最近 300 条）
+- **结果通知**：后台自动签到完成后用系统通知告知结果和失败原因
+- **外观**：深色模式（跟随系统 / 浅色 / 深色），预设色板或自定义 HEX 主题色；Android 12+ 支持跟随壁纸取色（Monet 动态取色）
+- **iOS 小组件**：主屏小组件显示上一次执行结果和下次执行时间
+- **备份与迁移**：把任务、位置收藏和界面设置导出为加密文件（PBKDF2 + AES-256-GCM），换手机时直接导入，Android 与 iOS 互通
+- **多语言与无障碍**：简体中文 / 繁體中文 / English，可跟随系统；支持系统字体大小（动态字体）和读屏（TalkBack / VoiceOver）标签
 
 | | Android | iOS |
 | --- | --- | --- |
@@ -35,13 +40,13 @@
 前往 [**Releases**](https://github.com/bai-piao/BJMFSign/releases/latest) 下载最新版本：
 
 - **Android**：下载 `BJMFSign-vX.Y.apk` 直接安装（需允许"安装未知来源应用"）。
-- **iOS**：下载 `BJMFSign-vX.Y-ios-unsigned.ipa`，用 [AltStore](https://altstore.io/)、[Sideloadly](https://sideloadly.io/) 等工具自签安装。
+- **iOS**：下载 `BJMFSign-vX.Y-ios-unsigned.ipa`，用 [AltStore](https://altstore.io/)、[Sideloadly](https://sideloadly.io/) 等工具自签安装。小组件依赖 App Group 共享数据，若自签工具不支持 App Group，小组件会一直显示“还没有执行记录”。
 
 > 想体验最新提交？在 [Actions](https://github.com/bai-piao/BJMFSign/actions) 中打开 **Android Release APK** 或 **iOS Build** 最近一次成功的运行，从 Artifacts 下载（需登录 GitHub）。
 
 ## 🚀 使用
 
-1. **登录**：在「登录」页获取二维码，用微信扫码并确认。iOS 可截图后在微信「扫一扫 → 相册」中识别。
+1. **登录**：首次打开会进入引导页；也可在「登录」页获取二维码，用微信扫码并确认。iOS 可截图后在微信「扫一扫 → 相册」中识别。
 2. **建任务**：登录成功后自动跳到「任务」页并填好姓名、班级 ID 和 Cookie；在地图上选择签到点，填写执行时间（如 `07:30:00,12:00:00`），保存。
 3. **签到**：到点自动执行；也可在任务页「立即签到」，或在「管理」页「执行全部」。结果在「日志」页查看。
 
@@ -108,6 +113,8 @@ keytool -genkeypair -v -keystore release.jks -alias bjmf -keyalg RSA -keysize 20
 BJMFSign/
 ├── android-app/          Android 客户端（Kotlin / Compose）
 ├── ios-app/              iOS 客户端（SwiftUI / Liquid Glass）
+├── i18n/                 繁体 / 英文译文（两端共用）
+├── scripts/gen_i18n.py   根据译文生成 Android / iOS 译文表
 ├── .github/workflows/    CI：构建 APK、IPA 与发布 Release
 ├── BJMF.py               旧版 Python 签到脚本
 ├── auto_add_user.py      旧版扫码添加用户工具
@@ -123,6 +130,11 @@ BJMFSign/
 | 本地存储 | `data/BjmfStore.kt` | `Data/BjmfStore.swift` |
 | 定时调度 | `data/BjmfScheduler.kt` | `Data/BjmfScheduler.swift` |
 | 界面状态 | `BjmfViewModel.kt` | `App/BjmfViewModel.swift` |
+| 加密备份 | `data/BackupCrypto.kt` | `Data/BackupCrypto.swift` |
+| 失败原因 / 诊断 | `data/Diagnostics.kt` | `Data/Diagnostics.swift` |
+| 多语言 | `data/I18n.kt` | `Shared/I18n.swift` |
+
+界面文案以简体中文为 key，繁体和英文译文统一维护在 `i18n/translations.json`。新增或修改 `tr("…")` 文案后运行 `python3 scripts/gen_i18n.py` 重新生成两端的译文表（缺失译文会列出来）。iOS 小组件位于 `ios-app/BJMFSignWidget`，通过 App Group `group.com.bjmf.sign.ios` 读取上一次执行结果。
 
 <details>
 <summary><b>旧版 Python 脚本（可选）</b></summary>
