@@ -35,6 +35,8 @@ class SignAlarmReceiver : BroadcastReceiver() {
                         ),
                     )
                     scheduler.schedule(task)
+                    I18n.language = store.loadLanguage()
+                    SignNotifier.notifyResult(appContext, result)
                 }
             } finally {
                 pendingResult.finish()

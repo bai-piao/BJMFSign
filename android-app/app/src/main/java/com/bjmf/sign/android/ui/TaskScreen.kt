@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bjmf.sign.android.BjmfUiState
+import com.bjmf.sign.android.data.tr
 import com.bjmf.sign.android.BjmfViewModel
 import com.bjmf.sign.android.data.BjmfTask
 import com.bjmf.sign.android.data.SIGN_ZONE
@@ -72,10 +73,10 @@ internal fun TaskScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
 @Composable
 private fun TaskListCard(state: BjmfUiState, viewModel: BjmfViewModel) {
     GlassCard(
-        title = "本机任务",
+        title = tr("本机任务"),
         action = {
             GlassButton(
-                text = "新建",
+                text = tr("新建"),
                 onClick = viewModel::startNewTask,
                 icon = GlassIcon.Plus,
                 size = GlassButtonSize.Small,
@@ -85,7 +86,7 @@ private fun TaskListCard(state: BjmfUiState, viewModel: BjmfViewModel) {
     ) {
         if (state.tasks.isEmpty()) {
             Text(
-                text = "还没有任务。扫码登录后会自动填入账号信息，选好位置和时间即可保存。",
+                text = tr("还没有任务。扫码登录后会自动填入账号信息，选好位置和时间即可保存。"),
                 color = Glass.palette.secondaryLabel,
                 fontSize = 15.sp,
             )
@@ -144,9 +145,9 @@ private fun TaskItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text(text = "班级 ${task.classId}", color = palette.secondaryLabel, fontSize = 12.sp)
+                Text(text = tr("班级 {0}", task.classId), color = palette.secondaryLabel, fontSize = 12.sp)
             }
-            GlassSwitch(checked = task.enabled, onCheckedChange = { onToggle() })
+            GlassSwitch(checked = task.enabled, onCheckedChange = { onToggle() }, contentDescription = tr("启用任务"))
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -175,8 +176,8 @@ private fun TaskItem(
 
         Text(
             text = buildString {
-                append("位置 ${task.lng}, ${task.lat} · 精度 ${task.acc}m")
-                dateRangeText(task.dateStart, task.dateEnd)?.let { append("\n生效 ").append(it) }
+                append(tr("位置 {0}, {1} · 精度 {2}m", task.lng, task.lat, task.acc))
+                dateRangeText(task.dateStart, task.dateEnd)?.let { append("\n").append(tr("生效 {0}", it)) }
             },
             color = palette.secondaryLabel,
             fontSize = 13.sp,
@@ -186,9 +187,9 @@ private fun TaskItem(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
         ) {
-            GlassButton(text = "编辑", onClick = onSelect, size = GlassButtonSize.Small)
+            GlassButton(text = tr("编辑"), onClick = onSelect, size = GlassButtonSize.Small)
             GlassButton(
-                text = "立即签到",
+                text = tr("立即签到"),
                 onClick = onRunNow,
                 icon = GlassIcon.Location,
                 size = GlassButtonSize.Small,
@@ -218,20 +219,20 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
     var confirmDelete by remember { mutableStateOf(false) }
 
     GlassCard(
-        title = if (editing) "编辑任务" else "新建任务",
+        title = if (editing) tr("编辑任务") else tr("新建任务"),
         modifier = Modifier.animateContentSize(),
     ) {
         // 基本信息
-        SectionHeader("基本信息")
+        SectionHeader(tr("基本信息"))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             LabeledField(
-                label = "姓名",
+                label = tr("姓名"),
                 value = form.name,
                 onValueChange = { onFormChange(form.copy(name = it)) },
                 modifier = Modifier.weight(1f),
             )
             LabeledField(
-                label = "班级 ID",
+                label = tr("班级 ID"),
                 value = form.classId,
                 onValueChange = { onFormChange(form.copy(classId = it)) },
                 keyboardType = KeyboardType.Number,
@@ -259,7 +260,7 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             LabeledField(
-                label = "定位精度（米）",
+                label = tr("定位精度（米）"),
                 value = form.acc,
                 onValueChange = { value -> onFormChange(form.copy(acc = value.filter(Char::isDigit))) },
                 keyboardType = KeyboardType.Number,
@@ -277,9 +278,9 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
 
         // 执行时间
         FormSectionGap()
-        SectionHeader("执行时间")
+        SectionHeader(tr("执行时间"))
         if (times.isEmpty()) {
-            Text("尚未添加执行时间", color = palette.secondaryLabel, fontSize = 15.sp)
+            Text(tr("尚未添加执行时间"), color = palette.secondaryLabel, fontSize = 15.sp)
         } else {
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -296,13 +297,13 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "点按时间可移除",
+                text = tr("点按时间可移除"),
                 color = palette.secondaryLabel,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1f),
             )
             GlassButton(
-                text = "添加时间",
+                text = tr("添加时间"),
                 onClick = { showTimePicker = true },
                 icon = GlassIcon.Plus,
                 size = GlassButtonSize.Small,
@@ -311,23 +312,23 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
 
         // 生效日期
         FormSectionGap()
-        SectionHeader("生效日期")
+        SectionHeader(tr("生效日期"))
         Column {
             DateRow(
-                label = "开始日期",
+                label = tr("开始日期"),
                 value = form.dateStart,
                 onPick = { datePickerTarget = "start" },
                 onClear = { onFormChange(form.copy(dateStart = "")) },
             )
             ListDivider()
             DateRow(
-                label = "结束日期",
+                label = tr("结束日期"),
                 value = form.dateEnd,
                 onPick = { datePickerTarget = "end" },
                 onClear = { onFormChange(form.copy(dateEnd = "")) },
             )
         }
-        Text("点按选择日期，留空表示不限制", color = palette.secondaryLabel, fontSize = 13.sp)
+        Text(tr("点按选择日期，留空表示不限制"), color = palette.secondaryLabel, fontSize = 13.sp)
 
         // 下次执行预览
         Row(
@@ -350,7 +351,7 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
 
         // 登录凭证
         FormSectionGap()
-        SectionHeader("登录凭证")
+        SectionHeader(tr("登录凭证"))
         PreferenceRow(
             title = "Cookie",
             summary = cookieSummary(form.cookie),
@@ -365,7 +366,7 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
         )
         if (showCookie || form.cookie.isBlank()) {
             LabeledField(
-                label = "Cookie（扫码登录后自动填入）",
+                label = tr("Cookie（扫码登录后自动填入）"),
                 value = form.cookie,
                 onValueChange = { onFormChange(form.copy(cookie = it)) },
                 singleLine = false,
@@ -374,14 +375,14 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
 
         // 通知推送
         FormSectionGap()
-        SectionHeader("通知推送（可选）")
+        SectionHeader(tr("通知推送（可选）"))
         LabeledField(
-            label = "Server酱 Key（微信）",
+            label = tr("Server酱 Key（微信）"),
             value = form.wxKey,
             onValueChange = { onFormChange(form.copy(wxKey = it.trim())) },
         )
         LabeledField(
-            label = "Qmsg酱 Key（QQ）",
+            label = tr("Qmsg酱 Key（QQ）"),
             value = form.qqKey,
             onValueChange = { onFormChange(form.copy(qqKey = it.trim())) },
         )
@@ -390,7 +391,7 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
         FormSectionGap()
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             GlassButton(
-                text = if (editing) "保存修改" else "保存任务",
+                text = if (editing) tr("保存修改") else tr("保存任务"),
                 onClick = viewModel::saveTask,
                 style = GlassButtonStyle.Prominent,
                 size = GlassButtonSize.Large,
@@ -399,7 +400,7 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
                 modifier = Modifier.weight(1f),
             )
             GlassButton(
-                text = "用扫码账号",
+                text = tr("用扫码账号"),
                 onClick = viewModel::newTaskFromAccount,
                 size = GlassButtonSize.Large,
                 enabled = !state.isBusy,
@@ -408,7 +409,7 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
         if (editing) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 GlassButton(
-                    text = "立即签到",
+                    text = tr("立即签到"),
                     onClick = viewModel::runSelectedNow,
                     size = GlassButtonSize.Large,
                     icon = GlassIcon.Location,
@@ -416,7 +417,7 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
                     modifier = Modifier.weight(1f),
                 )
                 GlassButton(
-                    text = "删除任务",
+                    text = tr("删除任务"),
                     onClick = { confirmDelete = true },
                     style = GlassButtonStyle.Destructive,
                     size = GlassButtonSize.Large,
@@ -437,7 +438,7 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
 
     DatePickerDialog(
         show = datePickerTarget != null,
-        title = if (datePickerTarget == "end") "选择结束日期" else "选择开始日期",
+        title = if (datePickerTarget == "end") tr("选择结束日期") else tr("选择开始日期"),
         initial = parseDateOrNull(if (datePickerTarget == "end") form.dateEnd else form.dateStart),
         onDismiss = { datePickerTarget = null },
         onConfirm = { date ->
@@ -449,9 +450,9 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
 
     ConfirmDialog(
         show = confirmDelete,
-        title = "删除任务",
-        summary = "确定删除「${form.name}」？该任务的定时也会一并取消。",
-        confirmText = "删除",
+        title = tr("删除任务"),
+        summary = tr("确定删除「{0}」？该任务的定时也会一并取消。", form.name),
+        confirmText = tr("删除"),
         destructive = true,
         onDismiss = { confirmDelete = false },
         onConfirm = {
@@ -470,12 +471,12 @@ private fun FormSectionGap() {
 private fun DateRow(label: String, value: String, onPick: () -> Unit, onClear: () -> Unit) {
     PreferenceRow(
         title = label,
-        value = value.ifBlank { "不限" },
+        value = value.ifBlank { tr("不限") },
         onClick = onPick,
         action = {
             if (value.isNotBlank()) {
                 GlassButton(
-                    text = "清除",
+                    text = tr("清除"),
                     onClick = onClear,
                     style = GlassButtonStyle.Destructive,
                     size = GlassButtonSize.Small,
@@ -495,7 +496,7 @@ private fun TimePickerDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (S
     var minute by remember { mutableIntStateOf(30) }
     WindowDialog(
         show = show,
-        title = "添加执行时间",
+        title = tr("添加执行时间"),
         onDismissRequest = onDismiss,
     ) {
         Row(
@@ -521,7 +522,7 @@ private fun TimePickerDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (S
         }
         Spacer(modifier = Modifier.height(16.dp))
         DialogButtons(
-            confirmText = "添加",
+            confirmText = tr("添加"),
             onDismiss = onDismiss,
             onConfirm = { onConfirm("%02d:%02d:00".format(hour, minute)) },
         )
@@ -557,26 +558,26 @@ private fun DatePickerDialog(
                 value = year,
                 onValueChange = { year = it },
                 range = (today.year - 1)..(today.year + 5),
-                label = { "${it}年" },
+                label = { tr("{0}年", it) },
             )
             NumberPicker(
                 value = month,
                 onValueChange = { month = it },
                 range = 1..12,
-                label = { "${it}月" },
+                label = { tr("{0}月", it) },
                 wrapAround = true,
             )
             NumberPicker(
                 value = day.coerceAtMost(maxDay),
                 onValueChange = { day = it },
                 range = 1..maxDay,
-                label = { "${it}日" },
+                label = { tr("{0}日", it) },
                 wrapAround = true,
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
         DialogButtons(
-            confirmText = "确定",
+            confirmText = tr("确定"),
             onDismiss = onDismiss,
             onConfirm = { onConfirm(LocalDate.of(year, month, day.coerceAtMost(maxDay))) },
         )
@@ -604,7 +605,7 @@ internal fun ConfirmDialog(
 }
 
 @Composable
-private fun DialogButtons(
+internal fun DialogButtons(
     confirmText: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
@@ -612,7 +613,7 @@ private fun DialogButtons(
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         GlassButton(
-            text = "取消",
+            text = tr("取消"),
             onClick = onDismiss,
             size = GlassButtonSize.Large,
             modifier = Modifier.weight(1f),
@@ -635,17 +636,17 @@ private val nextRunFormatter = DateTimeFormatter.ofPattern("MM-dd HH:mm", Locale
 private val timeOnlyFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.CHINA)
 
 internal fun nextRunLabel(times: List<String>, dateStart: String?, dateEnd: String?, enabled: Boolean): String {
-    if (!enabled) return "已停用"
-    if (times.isEmpty()) return "未设置执行时间"
-    val next = computeNextRunMillis(times, dateStart, dateEnd) ?: return "已过生效日期，不再执行"
+    if (!enabled) return tr("已停用")
+    if (times.isEmpty()) return tr("未设置执行时间")
+    val next = computeNextRunMillis(times, dateStart, dateEnd) ?: return tr("已过生效日期，不再执行")
     val dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(next), SIGN_ZONE)
     val today = LocalDate.now(SIGN_ZONE)
     val day = when (dateTime.toLocalDate()) {
-        today -> "今天 " + dateTime.format(timeOnlyFormatter)
-        today.plusDays(1) -> "明天 " + dateTime.format(timeOnlyFormatter)
+        today -> tr("今天 {0}", dateTime.format(timeOnlyFormatter))
+        today.plusDays(1) -> tr("明天 {0}", dateTime.format(timeOnlyFormatter))
         else -> dateTime.format(nextRunFormatter)
     }
-    return "下次执行：$day"
+    return tr("下次执行：{0}", day)
 }
 
 private fun shortTime(time: String): String = if (time.endsWith(":00") && time.length == 8) time.dropLast(3) else time
@@ -655,17 +656,17 @@ private fun dateRangeText(start: String?, end: String?): String? {
     val e = end?.takeIf { it.isNotBlank() }
     return when {
         s == null && e == null -> null
-        s != null && e != null -> "$s 至 $e"
-        s != null -> "$s 起"
-        else -> "至 $e"
+        s != null && e != null -> tr("{0} 至 {1}", s, e)
+        s != null -> tr("{0} 起", s)
+        else -> tr("至 {0}", e)
     }
 }
 
 private fun cookieSummary(cookie: String): String {
     val value = cookie.trim()
-    if (value.isEmpty()) return "未填写"
+    if (value.isEmpty()) return tr("未填写")
     val head = value.take(18)
-    return if (value.length > 18) "$head…（共 ${value.length} 字符）" else head
+    return if (value.length > 18) tr("{0}…（共 {1} 字符）", head, value.length) else head
 }
 
 // endregion

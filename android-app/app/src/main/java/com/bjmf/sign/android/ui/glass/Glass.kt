@@ -65,7 +65,14 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -344,6 +351,7 @@ fun GlassButton(
 fun GlassIconButton(
     icon: GlassIcon,
     onClick: () -> Unit,
+    contentDescription: String,
     modifier: Modifier = Modifier,
     size: Dp = 44.dp,
     enabled: Boolean = true,
@@ -380,7 +388,8 @@ fun GlassIconButton(
                 enabled = enabled,
                 role = Role.Button,
                 onClick = onClick,
-            ),
+            )
+            .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
         GlassIconGlyph(icon = icon, color = color, modifier = Modifier.size(size * 0.44f))
@@ -401,6 +410,7 @@ fun LabeledField(
     placeholder: String = label,
     singleLine: Boolean = true,
     keyboardType: KeyboardType = KeyboardType.Text,
+    password: Boolean = false,
 ) {
     val palette = Glass.palette
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -412,8 +422,11 @@ fun LabeledField(
             maxLines = if (singleLine) 1 else 4,
             textStyle = TextStyle(color = palette.label, fontSize = 16.sp),
             cursorBrush = SolidColor(Glass.accent),
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = if (password) KeyboardType.Password else keyboardType),
+            visualTransformation = if (password) PasswordVisualTransformation() else VisualTransformation.None,
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { this.contentDescription = label },
             decorationBox = { inner ->
                 Box(
                     modifier = Modifier
@@ -444,7 +457,7 @@ fun SegmentedControl(
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
-            .height(34.dp)
+            .heightIn(min = 34.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(palette.fill)
             .padding(2.dp),
@@ -455,22 +468,32 @@ fun SegmentedControl(
             animationSpec = spring(dampingRatio = 0.8f, stiffness = 500f),
             label = "segmentOffset",
         )
-        Box(
+        // 滑块与文字同高；文字行高度随系统字体缩放。
+        Box(modifier = Modifier.matchParentSize()) {
+            Box(
+                modifier = Modifier
+                    .offset(x = offset)
+                    .width(segmentWidth)
+                    .fillMaxHeight()
+                    .shadow(2.dp, RoundedCornerShape(8.dp))
+                    .background(palette.segmentThumb, RoundedCornerShape(8.dp)),
+            )
+        }
+        Row(
             modifier = Modifier
-                .offset(x = offset)
-                .width(segmentWidth)
-                .fillMaxHeight()
-                .shadow(2.dp, RoundedCornerShape(8.dp))
-                .background(palette.segmentThumb, RoundedCornerShape(8.dp)),
-        )
-        Row(modifier = Modifier.fillMaxSize()) {
+                .fillMaxWidth()
+                .heightIn(min = 30.dp)
+                .height(IntrinsicSize.Min),
+        ) {
             options.forEachIndexed { index, option ->
                 val interaction = remember { MutableInteractionSource() }
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .clickable(interactionSource = interaction, indication = null, role = Role.Tab) { onSelect(index) },
+                        .semantics { selected = index == selectedIndex }
+                        .clickable(interactionSource = interaction, indication = null, role = Role.Tab) { onSelect(index) }
+                        .padding(vertical = 6.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -488,7 +511,13 @@ fun SegmentedControl(
 
 /** iOS 风格开关。 */
 @Composable
-fun GlassSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
+fun GlassSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    contentDescription: String? = null,
+) {
     val palette = Glass.palette
     val track by animateColorAsState(if (checked) palette.green else palette.switchOff, label = "switchTrack")
     val thumbOffset by animateDpAsState(
@@ -511,6 +540,7 @@ fun GlassSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: 
                 interactionSource = interaction,
                 indication = null,
             )
+            .then(if (contentDescription != null) Modifier.semantics { this.contentDescription = contentDescription } else Modifier)
             .padding(2.dp),
     ) {
         Box(
@@ -530,6 +560,7 @@ fun GlassChip(
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     removable: Boolean = false,
+    contentDescription: String? = null,
     onClick: (() -> Unit)? = null,
 ) {
     val accent = Glass.accent
@@ -537,7 +568,11 @@ fun GlassChip(
         modifier = modifier
             .clip(CapsuleShape)
             .background(if (selected) accent else accent.copy(alpha = 0.14f))
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
+            .semantics {
+                this.selected = selected
+                if (contentDescription != null) this.contentDescription = contentDescription
+            }
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -645,7 +680,8 @@ fun GlassTabBar(
             .padding(horizontal = 20.dp, vertical = 10.dp)
             .widthIn(max = 520.dp)
             .fillMaxWidth()
-            .height(64.dp)
+            .heightIn(min = 64.dp)
+            .height(IntrinsicSize.Min)
             .shadow(16.dp, CapsuleShape, ambientColor = Color.Black.copy(alpha = 0.12f), spotColor = Color.Black.copy(alpha = 0.18f))
             .clip(CapsuleShape)
             .then(if (hazeState != null) Modifier.hazeEffect(state = hazeState, style = hazeStyle) else Modifier.background(palette.background))
@@ -663,7 +699,13 @@ fun GlassTabBar(
                     .fillMaxHeight()
                     .clip(CapsuleShape)
                     .background(if (selected) palette.fill else Color.Transparent)
-                    .clickable(interactionSource = interaction, indication = null, role = Role.Tab) { onSelect(index) },
+                    .clickable(interactionSource = interaction, indication = null, role = Role.Tab) { onSelect(index) }
+                    .semantics(mergeDescendants = true) {
+                        this.selected = selected
+                        val badge = item.badge
+                        contentDescription = if (badge != null && badge > 0) "${item.title}, $badge" else item.title
+                    }
+                    .padding(vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -711,6 +753,7 @@ fun GlassTabBar(
 enum class GlassIcon {
     Qr, Checklist, Doc, Gear, Plus, Check, Close, Location, Star, Refresh, Trash, Clock, Pause,
     ChevronDown, ChevronUp, Play, Copy,
+    Bell, Battery, ChevronLeft, ChevronRight, Upload, Download, Globe,
 }
 
 @Composable
@@ -828,6 +871,41 @@ fun GlassIconGlyph(icon: GlassIcon, color: Color, modifier: Modifier = Modifier)
             GlassIcon.ChevronDown -> polyline(0.22f to 0.38f, 0.5f to 0.64f, 0.78f to 0.38f)
             GlassIcon.ChevronUp -> polyline(0.22f to 0.62f, 0.5f to 0.36f, 0.78f to 0.62f)
             GlassIcon.Play -> polyline(0.28f to 0.16f, 0.84f to 0.5f, 0.28f to 0.84f, close = true, fill = true)
+            GlassIcon.Bell -> {
+                val path = Path().apply {
+                    moveTo(w * 0.2f, h * 0.72f)
+                    lineTo(w * 0.8f, h * 0.72f)
+                    cubicTo(w * 0.7f, h * 0.6f, w * 0.74f, h * 0.48f, w * 0.72f, h * 0.38f)
+                    cubicTo(w * 0.7f, h * 0.2f, w * 0.6f, h * 0.12f, w * 0.5f, h * 0.12f)
+                    cubicTo(w * 0.4f, h * 0.12f, w * 0.3f, h * 0.2f, w * 0.28f, h * 0.38f)
+                    cubicTo(w * 0.26f, h * 0.48f, w * 0.3f, h * 0.6f, w * 0.2f, h * 0.72f)
+                    close()
+                }
+                drawPath(path, color, style = stroke)
+                line(0.42f, 0.86f, 0.58f, 0.86f)
+            }
+            GlassIcon.Battery -> {
+                roundRect(0.08f, 0.3f, 0.74f, 0.42f, 0.08f)
+                line(0.9f, 0.44f, 0.9f, 0.58f)
+                roundRect(0.17f, 0.39f, 0.34f, 0.24f, 0.03f, fill = true)
+            }
+            GlassIcon.ChevronLeft -> polyline(0.62f to 0.2f, 0.36f to 0.5f, 0.62f to 0.8f)
+            GlassIcon.ChevronRight -> polyline(0.38f to 0.2f, 0.64f to 0.5f, 0.38f to 0.8f)
+            GlassIcon.Upload -> {
+                polyline(0.3f to 0.34f, 0.5f to 0.14f, 0.7f to 0.34f)
+                line(0.5f, 0.14f, 0.5f, 0.64f)
+                polyline(0.16f to 0.6f, 0.16f to 0.86f, 0.84f to 0.86f, 0.84f to 0.6f)
+            }
+            GlassIcon.Download -> {
+                polyline(0.3f to 0.44f, 0.5f to 0.64f, 0.7f to 0.44f)
+                line(0.5f, 0.14f, 0.5f, 0.64f)
+                polyline(0.16f to 0.6f, 0.16f to 0.86f, 0.84f to 0.86f, 0.84f to 0.6f)
+            }
+            GlassIcon.Globe -> {
+                drawCircle(color, radius = w * 0.4f, center = p(0.5f, 0.5f), style = stroke)
+                drawOval(color, topLeft = p(0.32f, 0.1f), size = Size(w * 0.36f, h * 0.8f), style = stroke)
+                line(0.1f, 0.5f, 0.9f, 0.5f)
+            }
             GlassIcon.Copy -> {
                 roundRect(0.3f, 0.08f, 0.6f, 0.62f, 0.1f)
                 polyline(0.18f to 0.3f, 0.1f to 0.3f, 0.1f to 0.92f, 0.66f to 0.92f, 0.66f to 0.84f)

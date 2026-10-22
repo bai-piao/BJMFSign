@@ -4,19 +4,20 @@ import android.graphics.BitmapFactory
 import android.util.Base64
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import com.bjmf.sign.android.data.tr
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 internal fun statusLabel(status: String): String {
     return when (status) {
-        "success" -> "成功"
-        "already_signed" -> "已签到"
-        "not_started" -> "未开始"
-        "no_sign_in" -> "无签到"
-        "skip" -> "跳过"
-        "error" -> "失败"
-        else -> status.ifBlank { "未知" }
+        "success" -> tr("成功")
+        "already_signed" -> tr("已签到")
+        "not_started" -> tr("未开始")
+        "no_sign_in" -> tr("无签到")
+        "skip" -> tr("跳过")
+        "error" -> tr("失败")
+        else -> status.ifBlank { tr("未知") }
     }
 }
 
