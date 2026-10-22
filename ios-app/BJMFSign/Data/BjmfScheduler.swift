@@ -232,7 +232,7 @@ final class SignRunner {
             content.body = Diagnostics.readableReason(status: result.status, message: result.message)
             content.sound = success ? nil : .default
             let request = UNNotificationRequest(identifier: "bjmf-result-\(result.taskId)", content: content, trigger: nil)
-            UNUserNotificationCenter.current().add(request)
+            try? await UNUserNotificationCenter.current().add(request)
         }
     }
 
