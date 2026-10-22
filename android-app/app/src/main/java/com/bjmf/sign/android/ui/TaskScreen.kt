@@ -1,5 +1,6 @@
 package com.bjmf.sign.android.ui
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,8 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,23 +40,26 @@ import com.bjmf.sign.android.data.TaskForm
 import com.bjmf.sign.android.data.computeNextRunMillis
 import com.bjmf.sign.android.data.normalizeTimes
 import com.bjmf.sign.android.data.parseDateOrNull
+import com.bjmf.sign.android.ui.glass.Glass
+import com.bjmf.sign.android.ui.glass.GlassButton
+import com.bjmf.sign.android.ui.glass.GlassButtonSize
+import com.bjmf.sign.android.ui.glass.GlassButtonStyle
+import com.bjmf.sign.android.ui.glass.GlassCard
+import com.bjmf.sign.android.ui.glass.GlassChip
+import com.bjmf.sign.android.ui.glass.GlassIcon
+import com.bjmf.sign.android.ui.glass.GlassIconGlyph
+import com.bjmf.sign.android.ui.glass.GlassSwitch
+import com.bjmf.sign.android.ui.glass.LabeledField
+import com.bjmf.sign.android.ui.glass.SectionHeader
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.NumberPicker
-import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
-
-private val ENABLED_GREEN = Color(0xFF24C96B)
 
 @Composable
 internal fun TaskScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
@@ -67,28 +71,37 @@ internal fun TaskScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
 
 @Composable
 private fun TaskListCard(state: BjmfUiState, viewModel: BjmfViewModel) {
-    SectionCard(
+    GlassCard(
         title = "本机任务",
         action = {
-            TextButton(text = "新建", onClick = viewModel::startNewTask, enabled = !state.isBusy)
+            GlassButton(
+                text = "新建",
+                onClick = viewModel::startNewTask,
+                icon = GlassIcon.Plus,
+                size = GlassButtonSize.Small,
+                enabled = !state.isBusy,
+            )
         },
     ) {
         if (state.tasks.isEmpty()) {
             Text(
                 text = "还没有任务。扫码登录后会自动填入账号信息，选好位置和时间即可保存。",
-                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                color = Glass.palette.secondaryLabel,
+                fontSize = 15.sp,
             )
         } else {
-            state.tasks.forEachIndexed { index, task ->
-                TaskItem(
-                    task = task,
-                    selected = task.id == state.selectedTaskId,
-                    isBusy = state.isBusy,
-                    onSelect = { viewModel.selectTask(task) },
-                    onToggle = { viewModel.toggleTask(task) },
-                    onRunNow = { viewModel.runTaskNow(task) },
-                )
-                if (index != state.tasks.lastIndex) ListDivider()
+            Column {
+                state.tasks.forEachIndexed { index, task ->
+                    TaskItem(
+                        task = task,
+                        selected = task.id == state.selectedTaskId,
+                        isBusy = state.isBusy,
+                        onSelect = { viewModel.selectTask(task) },
+                        onToggle = { viewModel.toggleTask(task) },
+                        onRunNow = { viewModel.runTaskNow(task) },
+                    )
+                    if (index != state.tasks.lastIndex) ListDivider()
+                }
             }
         }
     }
@@ -104,93 +117,83 @@ private fun TaskItem(
     onToggle: () -> Unit,
     onRunNow: () -> Unit,
 ) {
-    val summaryColor = MiuixTheme.colorScheme.onSurfaceVariantSummary
+    val palette = Glass.palette
+    val accent = Glass.accent
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .then(
-                if (selected) Modifier.background(MiuixTheme.colorScheme.tertiaryContainer) else Modifier,
-            )
+            .clip(RoundedCornerShape(16.dp))
+            .then(if (selected) Modifier.background(accent.copy(alpha = 0.14f)) else Modifier)
             .clickable(onClick = onSelect)
-            .padding(horizontal = if (selected) 12.dp else 0.dp, vertical = 12.dp),
+            .padding(horizontal = if (selected) 12.dp else 0.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .size(9.dp)
-                    .background(if (task.enabled) ENABLED_GREEN else summaryColor.copy(alpha = 0.5f), CircleShape),
+                    .background(if (task.enabled) palette.green else palette.secondaryLabel.copy(alpha = 0.5f), CircleShape),
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = task.name,
+                    color = palette.label,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text(
-                    text = "班级 ${task.classId}",
-                    color = summaryColor,
-                    fontSize = 13.sp,
-                )
+                Text(text = "班级 ${task.classId}", color = palette.secondaryLabel, fontSize = 12.sp)
             }
-            Switch(checked = task.enabled, onCheckedChange = { onToggle() })
+            GlassSwitch(checked = task.enabled, onCheckedChange = { onToggle() })
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = nextRunLabel(task.times, task.dateStart, task.dateEnd, task.enabled),
-            color = if (task.enabled) MiuixTheme.colorScheme.primary else summaryColor,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            GlassIconGlyph(
+                icon = if (task.enabled) GlassIcon.Clock else GlassIcon.Pause,
+                color = if (task.enabled) accent else palette.secondaryLabel,
+                modifier = Modifier.size(15.dp),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = nextRunLabel(task.times, task.dateStart, task.dateEnd, task.enabled),
+                color = if (task.enabled) accent else palette.secondaryLabel,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
 
         if (task.times.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                task.times.forEach { TimeChip(it) }
+                task.times.forEach { GlassChip(text = shortTime(it)) }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = buildString {
                 append("位置 ${task.lng}, ${task.lat} · 精度 ${task.acc}m")
                 dateRangeText(task.dateStart, task.dateEnd)?.let { append("\n生效 ").append(it) }
             },
-            color = summaryColor,
+            color = palette.secondaryLabel,
             fontSize = 13.sp,
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
         ) {
-            TextButton(text = "编辑", onClick = onSelect)
-            TextButton(text = "立即签到", onClick = onRunNow, enabled = !isBusy)
-        }
-    }
-}
-
-@Composable
-private fun TimeChip(time: String, onRemove: (() -> Unit)? = null) {
-    val primary = MiuixTheme.colorScheme.primary
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(primary.copy(alpha = 0.12f))
-            .then(if (onRemove != null) Modifier.clickable(onClick = onRemove) else Modifier)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(text = shortTime(time), color = primary, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-        if (onRemove != null) {
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(text = "×", color = primary.copy(alpha = 0.7f), fontSize = 15.sp)
+            GlassButton(text = "编辑", onClick = onSelect, size = GlassButtonSize.Small)
+            GlassButton(
+                text = "立即签到",
+                onClick = onRunNow,
+                icon = GlassIcon.Location,
+                size = GlassButtonSize.Small,
+                enabled = !isBusy,
+            )
         }
     }
 }
@@ -206,35 +209,38 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
     val editing = state.selectedTaskId != null
     val onFormChange: (TaskForm) -> Unit = viewModel::updateTaskForm
     val times = remember(form.timesText) { normalizeTimes(form.timesText) }
-    val summaryColor = MiuixTheme.colorScheme.onSurfaceVariantSummary
+    val palette = Glass.palette
+    val accent = Glass.accent
 
     var showTimePicker by remember { mutableStateOf(false) }
     var datePickerTarget by remember { mutableStateOf<String?>(null) }
     var showCookie by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
 
-    SectionCard(title = if (editing) "编辑任务" else "新建任务") {
+    GlassCard(
+        title = if (editing) "编辑任务" else "新建任务",
+        modifier = Modifier.animateContentSize(),
+    ) {
         // 基本信息
-        FormSectionTitle("基本信息")
+        SectionHeader("基本信息")
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            TextField(
+            LabeledField(
+                label = "姓名",
                 value = form.name,
                 onValueChange = { onFormChange(form.copy(name = it)) },
-                label = "姓名",
-                singleLine = true,
                 modifier = Modifier.weight(1f),
             )
-            TextField(
+            LabeledField(
+                label = "班级 ID",
                 value = form.classId,
                 onValueChange = { onFormChange(form.copy(classId = it)) },
-                label = "班级 ID",
-                singleLine = true,
+                keyboardType = KeyboardType.Number,
                 modifier = Modifier.weight(1f),
             )
         }
 
         // 签到位置
-        FormSectionDivider()
+        FormSectionGap()
         MapCoordinatePicker(
             coord = form.coord,
             favoriteLocations = state.favoriteLocations,
@@ -248,154 +254,174 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
             onDeleteFavoriteLocation = viewModel::deleteFavoriteLocation,
             onLocationPermissionDenied = viewModel::locationPermissionDenied,
         )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text("定位精度（米）", fontSize = 14.sp, color = summaryColor)
-        Spacer(modifier = Modifier.height(6.dp))
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            TextField(
+            LabeledField(
+                label = "定位精度（米）",
                 value = form.acc,
                 onValueChange = { value -> onFormChange(form.copy(acc = value.filter(Char::isDigit))) },
-                label = "精度",
-                singleLine = true,
+                keyboardType = KeyboardType.Number,
                 modifier = Modifier.weight(1f),
             )
             listOf("10", "30", "50", "100").forEach { preset ->
-                OptionChip(
+                GlassChip(
                     text = preset,
                     selected = form.acc.trim() == preset,
                     onClick = { onFormChange(form.copy(acc = preset)) },
+                    modifier = Modifier.padding(bottom = 6.dp),
                 )
             }
         }
 
         // 执行时间
-        FormSectionDivider()
-        FormSectionTitle("执行时间")
+        FormSectionGap()
+        SectionHeader("执行时间")
         if (times.isEmpty()) {
-            Text("尚未添加执行时间", color = summaryColor)
+            Text("尚未添加执行时间", color = palette.secondaryLabel, fontSize = 15.sp)
         } else {
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 times.forEach { time ->
-                    TimeChip(time) {
-                        onFormChange(form.copy(timesText = (times - time).joinToString(",")))
-                    }
+                    GlassChip(
+                        text = shortTime(time),
+                        removable = true,
+                        onClick = { onFormChange(form.copy(timesText = (times - time).joinToString(","))) },
+                    )
                 }
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "点按时间可移除",
-                color = summaryColor,
+                color = palette.secondaryLabel,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1f),
             )
-            TextButton(text = "+ 添加时间", onClick = { showTimePicker = true })
+            GlassButton(
+                text = "添加时间",
+                onClick = { showTimePicker = true },
+                icon = GlassIcon.Plus,
+                size = GlassButtonSize.Small,
+            )
         }
 
         // 生效日期
-        FormSectionDivider()
-        FormSectionTitle("生效日期")
-        DateRow(
-            label = "开始日期",
-            value = form.dateStart,
-            onPick = { datePickerTarget = "start" },
-            onClear = { onFormChange(form.copy(dateStart = "")) },
-        )
-        DateRow(
-            label = "结束日期",
-            value = form.dateEnd,
-            onPick = { datePickerTarget = "end" },
-            onClear = { onFormChange(form.copy(dateEnd = "")) },
-        )
-        Text("留空表示不限制", color = summaryColor, fontSize = 13.sp)
+        FormSectionGap()
+        SectionHeader("生效日期")
+        Column {
+            DateRow(
+                label = "开始日期",
+                value = form.dateStart,
+                onPick = { datePickerTarget = "start" },
+                onClear = { onFormChange(form.copy(dateStart = "")) },
+            )
+            ListDivider()
+            DateRow(
+                label = "结束日期",
+                value = form.dateEnd,
+                onPick = { datePickerTarget = "end" },
+                onClear = { onFormChange(form.copy(dateEnd = "")) },
+            )
+        }
+        Text("点按选择日期，留空表示不限制", color = palette.secondaryLabel, fontSize = 13.sp)
 
         // 下次执行预览
-        Spacer(modifier = Modifier.height(10.dp))
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(MiuixTheme.colorScheme.primary.copy(alpha = 0.10f))
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+                .clip(RoundedCornerShape(14.dp))
+                .background(accent.copy(alpha = 0.12f))
+                .padding(horizontal = 14.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
+            GlassIconGlyph(GlassIcon.Clock, color = accent, modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = nextRunLabel(times, form.dateStart, form.dateEnd, enabled = true),
-                color = MiuixTheme.colorScheme.primary,
+                color = accent,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
             )
         }
 
         // 登录凭证
-        FormSectionDivider()
-        FormSectionTitle("登录凭证")
+        FormSectionGap()
+        SectionHeader("登录凭证")
         PreferenceRow(
             title = "Cookie",
             summary = cookieSummary(form.cookie),
             onClick = { showCookie = !showCookie },
             action = {
-                TextButton(text = if (showCookie) "收起" else "编辑", onClick = { showCookie = !showCookie })
+                GlassIconGlyph(
+                    icon = if (showCookie) GlassIcon.ChevronUp else GlassIcon.ChevronDown,
+                    color = palette.secondaryLabel,
+                    modifier = Modifier.size(16.dp),
+                )
             },
         )
         if (showCookie || form.cookie.isBlank()) {
-            TextField(
+            LabeledField(
+                label = "Cookie（扫码登录后自动填入）",
                 value = form.cookie,
                 onValueChange = { onFormChange(form.copy(cookie = it)) },
-                label = "Cookie（扫码登录后自动填入）",
-                maxLines = 4,
-                modifier = Modifier.fillMaxWidth(),
+                singleLine = false,
             )
         }
 
         // 通知推送
-        FormSectionDivider()
-        FormSectionTitle("通知推送（可选）")
-        TextField(
+        FormSectionGap()
+        SectionHeader("通知推送（可选）")
+        LabeledField(
+            label = "Server酱 Key（微信）",
             value = form.wxKey,
             onValueChange = { onFormChange(form.copy(wxKey = it.trim())) },
-            label = "Server酱 Key（微信）",
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(modifier = Modifier.height(10.dp))
-        TextField(
+        LabeledField(
+            label = "Qmsg酱 Key（QQ）",
             value = form.qqKey,
             onValueChange = { onFormChange(form.copy(qqKey = it.trim())) },
-            label = "Qmsg酱 Key（QQ）",
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
         )
 
         // 操作
-        Spacer(modifier = Modifier.height(18.dp))
+        FormSectionGap()
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(
+            GlassButton(
+                text = if (editing) "保存修改" else "保存任务",
                 onClick = viewModel::saveTask,
+                style = GlassButtonStyle.Prominent,
+                size = GlassButtonSize.Large,
+                icon = GlassIcon.Check,
                 enabled = !state.isBusy,
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColorsPrimary(),
-            ) {
-                Text(if (editing) "保存修改" else "保存任务")
-            }
-            TextButton(text = "用扫码账号", onClick = viewModel::newTaskFromAccount, enabled = !state.isBusy)
+            )
+            GlassButton(
+                text = "用扫码账号",
+                onClick = viewModel::newTaskFromAccount,
+                size = GlassButtonSize.Large,
+                enabled = !state.isBusy,
+            )
         }
         if (editing) {
-            Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
+                GlassButton(
+                    text = "立即签到",
                     onClick = viewModel::runSelectedNow,
+                    size = GlassButtonSize.Large,
+                    icon = GlassIcon.Location,
                     enabled = !state.isBusy,
                     modifier = Modifier.weight(1f),
-                ) {
-                    Text("立即签到")
-                }
-                TextButton(text = "删除任务", onClick = { confirmDelete = true }, enabled = !state.isBusy)
+                )
+                GlassButton(
+                    text = "删除任务",
+                    onClick = { confirmDelete = true },
+                    style = GlassButtonStyle.Destructive,
+                    size = GlassButtonSize.Large,
+                    enabled = !state.isBusy,
+                )
             }
         }
     }
@@ -426,6 +452,7 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
         title = "删除任务",
         summary = "确定删除「${form.name}」？该任务的定时也会一并取消。",
         confirmText = "删除",
+        destructive = true,
         onDismiss = { confirmDelete = false },
         onConfirm = {
             confirmDelete = false
@@ -435,38 +462,8 @@ private fun TaskEditorCard(state: BjmfUiState, viewModel: BjmfViewModel) {
 }
 
 @Composable
-internal fun FormSectionTitle(text: String) {
-    Text(
-        text = text,
-        color = MiuixTheme.colorScheme.primary,
-        fontSize = 14.sp,
-        fontWeight = FontWeight.SemiBold,
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-}
-
-@Composable
-private fun FormSectionDivider() {
-    Spacer(modifier = Modifier.height(18.dp))
-}
-
-@Composable
-private fun OptionChip(text: String, selected: Boolean, onClick: () -> Unit) {
-    val primary = MiuixTheme.colorScheme.primary
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(if (selected) primary else primary.copy(alpha = 0.10f))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-    ) {
-        Text(
-            text = text,
-            color = if (selected) MiuixTheme.colorScheme.onPrimary else primary,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-        )
-    }
+private fun FormSectionGap() {
+    Spacer(modifier = Modifier.height(4.dp))
 }
 
 @Composable
@@ -477,7 +474,12 @@ private fun DateRow(label: String, value: String, onPick: () -> Unit, onClear: (
         onClick = onPick,
         action = {
             if (value.isNotBlank()) {
-                TextButton(text = "清除", onClick = onClear)
+                GlassButton(
+                    text = "清除",
+                    onClick = onClear,
+                    style = GlassButtonStyle.Destructive,
+                    size = GlassButtonSize.Small,
+                )
             }
         },
     )
@@ -589,6 +591,7 @@ internal fun ConfirmDialog(
     confirmText: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
+    destructive: Boolean = false,
 ) {
     WindowDialog(
         show = show,
@@ -596,23 +599,30 @@ internal fun ConfirmDialog(
         summary = summary,
         onDismissRequest = onDismiss,
     ) {
-        DialogButtons(confirmText = confirmText, onDismiss = onDismiss, onConfirm = onConfirm)
+        DialogButtons(confirmText = confirmText, onDismiss = onDismiss, onConfirm = onConfirm, destructive = destructive)
     }
 }
 
 @Composable
-private fun DialogButtons(confirmText: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+private fun DialogButtons(
+    confirmText: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    destructive: Boolean = false,
+) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        TextButton(
+        GlassButton(
             text = "取消",
             onClick = onDismiss,
+            size = GlassButtonSize.Large,
             modifier = Modifier.weight(1f),
         )
-        TextButton(
+        GlassButton(
             text = confirmText,
             onClick = onConfirm,
+            style = if (destructive) GlassButtonStyle.Destructive else GlassButtonStyle.Prominent,
+            size = GlassButtonSize.Large,
             modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.textButtonColorsPrimary(),
         )
     }
 }
