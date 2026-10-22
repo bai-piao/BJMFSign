@@ -59,6 +59,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("dev.chrisbanes.haze:haze:1.7.3")
     implementation("org.jetbrains.compose.foundation:foundation:1.11.1")
     implementation("org.jetbrains.compose.ui:ui:1.11.1")
     implementation("org.jetbrains.compose.ui:ui-graphics:1.11.1")
