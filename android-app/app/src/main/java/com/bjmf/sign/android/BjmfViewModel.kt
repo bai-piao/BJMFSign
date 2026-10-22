@@ -1,6 +1,7 @@
 package com.bjmf.sign.android
 
 import android.app.Application
+import android.net.Uri
 import android.content.Context
 import android.location.Location
 import android.location.LocationListener
@@ -9,7 +10,9 @@ import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.bjmf.sign.android.data.BackupCrypto
 import com.bjmf.sign.android.data.BjmfNativeService
+import com.bjmf.sign.android.data.I18n
 import com.bjmf.sign.android.data.BjmfScheduler
 import com.bjmf.sign.android.data.BjmfStore
 import com.bjmf.sign.android.data.BjmfTask
@@ -18,7 +21,11 @@ import com.bjmf.sign.android.data.LoginAccount
 import com.bjmf.sign.android.data.TaskForm
 import com.bjmf.sign.android.data.TaskLog
 import com.bjmf.sign.android.data.normalizeTimes
+import com.bjmf.sign.android.data.isSuccessStatus
+import com.bjmf.sign.android.data.tr
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +51,7 @@ data class BjmfUiState(
     val isBusy: Boolean = false,
     val isPolling: Boolean = false,
     val qrImageDataUrl: String? = null,
-    val qrStatusText: String = "尚未创建扫码会话",
+    val qrStatusText: String = tr("尚未创建扫码会话"),
     val account: LoginAccount? = null,
     val tasks: List<BjmfTask> = emptyList(),
     val logs: List<TaskLog> = emptyList(),
@@ -54,6 +61,9 @@ data class BjmfUiState(
     val accentColor: Long = BjmfStore.DEFAULT_ACCENT_COLOR,
     val accentColorText: String = BjmfStore.DEFAULT_ACCENT_COLOR.toHexColor(),
     val themeMode: String = BjmfStore.THEME_SYSTEM,
+    val language: String = I18n.SYSTEM,
+    val dynamicColor: Boolean = false,
+    val showOnboarding: Boolean = false,
     val message: String? = null,
 )
 
@@ -65,6 +75,11 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
     private var qrSession: BjmfNativeService.QrSession? = null
     private var pollingJob: Job? = null
 
+    init {
+        // 先恢复界面语言，后续初始文案才能按所选语言生成。
+        I18n.language = store.loadLanguage()
+    }
+
     private val _uiState = MutableStateFlow(
         BjmfUiState(
             tasks = store.loadTasks(),
@@ -73,6 +88,9 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
             accentColor = store.loadAccentColor(),
             accentColorText = store.loadAccentColor().toHexColor(),
             themeMode = store.loadThemeMode(),
+            language = store.loadLanguage(),
+            dynamicColor = store.loadDynamicColor(),
+            showOnboarding = !store.isOnboardingDone(),
         ),
     )
     val uiState: StateFlow<BjmfUiState> = _uiState.asStateFlow()
@@ -101,7 +119,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
                 it.copy(
                     isBusy = true,
                     isPolling = false,
-                    qrStatusText = "正在获取微信扫码二维码...",
+                    qrStatusText = tr("正在获取微信扫码二维码..."),
                     qrImageDataUrl = null,
                     message = null,
                 )
@@ -114,7 +132,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
                             isBusy = false,
                             isPolling = true,
                             qrImageDataUrl = session.qr.imageDataUrl,
-                            qrStatusText = "请使用微信扫码并确认登录",
+                            qrStatusText = tr("请使用微信扫码并确认登录"),
                             account = null,
                         )
                     }
@@ -125,8 +143,8 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
                         it.copy(
                             isBusy = false,
                             isPolling = false,
-                            qrStatusText = "二维码创建失败",
-                            message = throwable.cleanMessage("二维码创建失败"),
+                            qrStatusText = tr("二维码创建失败"),
+                            message = throwable.cleanMessage(tr("二维码创建失败")),
                         )
                     }
                 }
@@ -140,7 +158,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
             it.copy(
                 isPolling = false,
                 qrImageDataUrl = null,
-                qrStatusText = "已清除扫码会话",
+                qrStatusText = tr("已清除扫码会话"),
                 message = null,
             )
         }
@@ -152,7 +170,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
                 selectedTaskId = task.id,
                 taskForm = task.toForm(),
                 screen = BjmfScreen.Task,
-                message = "已载入 ${task.name} 的任务",
+                message = tr("已载入 {0} 的任务", task.name),
             )
         }
     }
@@ -173,7 +191,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
                 selectedTaskId = null,
                 taskForm = form,
                 screen = BjmfScreen.Task,
-                message = if (account == null) "请先扫码登录，或手动填入 Cookie" else "已用当前登录账号填充任务",
+                message = if (account == null) tr("请先扫码登录，或手动填入 Cookie") else tr("已用当前登录账号填充任务"),
             )
         }
     }
@@ -186,11 +204,11 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
             val times = normalizeTimes(form.timesText)
 
             if (form.name.isBlank() || form.classId.isBlank() || form.cookie.isBlank()) {
-                _uiState.update { it.copy(message = "姓名、班级 ID 和 Cookie 不能为空") }
+                _uiState.update { it.copy(message = tr("姓名、班级 ID 和 Cookie 不能为空")) }
                 return@launch
             }
             if (coord == null || times.isEmpty()) {
-                _uiState.update { it.copy(message = "坐标和执行时间格式不正确") }
+                _uiState.update { it.copy(message = tr("坐标和执行时间格式不正确")) }
                 return@launch
             }
 
@@ -219,7 +237,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
                 it.copy(
                     screen = BjmfScreen.Task,
                     taskForm = saved.toForm(),
-                    message = "任务已保存，并已安排下一次自动签到",
+                    message = tr("任务已保存，并已安排下一次自动签到"),
                 )
             }
         }
@@ -231,7 +249,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
         store.deleteTask(taskId)
         reloadLocalData(selectedTaskId = null)
         _uiState.update {
-            it.copy(taskForm = accountFormOrEmpty(it.account), message = "任务已删除")
+            it.copy(taskForm = accountFormOrEmpty(it.account), message = tr("任务已删除"))
         }
     }
 
@@ -243,7 +261,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
             scheduler.cancel(saved.id)
         }
         reloadLocalData(selectedTaskId = saved.id)
-        _uiState.update { it.copy(message = if (saved.enabled) "任务已启用" else "任务已停用") }
+        _uiState.update { it.copy(message = if (saved.enabled) tr("任务已启用") else tr("任务已停用")) }
     }
 
     fun startNewTask() {
@@ -252,7 +270,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
                 selectedTaskId = null,
                 taskForm = accountFormOrEmpty(it.account),
                 screen = BjmfScreen.Task,
-                message = if (it.account == null) "新建任务：请填写信息或先扫码登录" else "新建任务：已填入当前扫码账号",
+                message = if (it.account == null) tr("新建任务：请填写信息或先扫码登录") else tr("新建任务：已填入当前扫码账号"),
             )
         }
     }
@@ -262,15 +280,100 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
         runTasksNow(listOf(latest), summary = false)
     }
 
+    fun setLanguage(language: String) {
+        store.saveLanguage(language)
+        I18n.language = language
+        _uiState.update { it.copy(language = language, message = tr("界面语言已切换")) }
+    }
+
+    fun setDynamicColor(enabled: Boolean) {
+        store.saveDynamicColor(enabled)
+        _uiState.update {
+            it.copy(
+                dynamicColor = enabled,
+                message = if (enabled) tr("已开启跟随壁纸取色") else tr("已关闭跟随壁纸取色"),
+            )
+        }
+    }
+
+    fun completeOnboarding() {
+        store.setOnboardingDone(true)
+        _uiState.update {
+            it.copy(
+                showOnboarding = false,
+                screen = if (it.account != null) BjmfScreen.Task else BjmfScreen.Login,
+                message = tr("设置完成，开始使用吧"),
+            )
+        }
+    }
+
+    fun reopenOnboarding() {
+        _uiState.update { it.copy(showOnboarding = true, message = null) }
+    }
+
+    fun exportBackup(uri: Uri, password: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isBusy = true, message = tr("正在加密导出...")) }
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    val encrypted = BackupCrypto.encrypt(store.buildBackupJson(), password)
+                    appContext.contentResolver.openOutputStream(uri, "wt")?.use { it.write(encrypted.toByteArray(Charsets.UTF_8)) }
+                        ?: error(tr("无法写入所选文件"))
+                }
+            }.onSuccess {
+                _uiState.update { it.copy(isBusy = false, message = tr("备份已导出，请妥善保管文件和密码")) }
+            }.onFailure { throwable ->
+                _uiState.update { it.copy(isBusy = false, message = tr("导出失败：{0}", throwable.localizedMessage ?: "")) }
+            }
+        }
+    }
+
+    fun importBackup(uri: Uri, password: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isBusy = true, message = tr("正在解密导入...")) }
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    val content = appContext.contentResolver.openInputStream(uri)?.use { it.readBytes().toString(Charsets.UTF_8) }
+                        ?: error(tr("无法读取所选文件"))
+                    store.restoreBackupJson(BackupCrypto.decrypt(content, password))
+                }
+            }.onSuccess { summary ->
+                I18n.language = store.loadLanguage()
+                val tasks = store.loadTasks()
+                scheduler.scheduleAll(tasks)
+                reloadLocalData(selectedTaskId = null)
+                _uiState.update {
+                    it.copy(
+                        isBusy = false,
+                        accentColor = store.loadAccentColor(),
+                        accentColorText = store.loadAccentColor().toHexColor(),
+                        themeMode = store.loadThemeMode(),
+                        language = store.loadLanguage(),
+                        dynamicColor = store.loadDynamicColor(),
+                        taskForm = accountFormOrEmpty(it.account),
+                        message = tr("已导入 {0} 个任务、{1} 个位置收藏", summary.tasks, summary.locations),
+                    )
+                }
+            }.onFailure { throwable ->
+                val reason = when (throwable) {
+                    is BackupCrypto.WrongPasswordException -> tr("密码错误或文件已损坏")
+                    is BackupCrypto.InvalidFileException -> tr("不是有效的备份文件")
+                    else -> throwable.localizedMessage ?: tr("导入失败")
+                }
+                _uiState.update { it.copy(isBusy = false, message = tr("导入失败：{0}", reason)) }
+            }
+        }
+    }
+
     fun setThemeMode(mode: String) {
         store.saveThemeMode(mode)
         _uiState.update {
             it.copy(
                 themeMode = mode,
                 message = when (mode) {
-                    BjmfStore.THEME_LIGHT -> "已切换为浅色模式"
-                    BjmfStore.THEME_DARK -> "已切换为深色模式"
-                    else -> "已设为跟随系统"
+                    BjmfStore.THEME_LIGHT -> tr("已切换为浅色模式")
+                    BjmfStore.THEME_DARK -> tr("已切换为深色模式")
+                    else -> tr("已设为跟随系统")
                 },
             )
         }
@@ -280,7 +383,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
         val taskId = uiState.value.selectedTaskId
         val task = taskId?.let(store::findTask)
         if (task == null) {
-            _uiState.update { it.copy(message = "请先选择一个任务") }
+            _uiState.update { it.copy(message = tr("请先选择一个任务")) }
             return
         }
         runTasksNow(listOf(task), summary = false)
@@ -289,7 +392,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
     fun runAllEnabledNow() {
         val tasks = store.loadTasks().filter { it.enabled }
         if (tasks.isEmpty()) {
-            _uiState.update { it.copy(message = "没有已启用的任务") }
+            _uiState.update { it.copy(message = tr("没有已启用的任务")) }
             return
         }
         runTasksNow(tasks, summary = true)
@@ -298,30 +401,30 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
     fun rescheduleAll() {
         val tasks = store.loadTasks()
         scheduler.scheduleAll(tasks)
-        _uiState.update { it.copy(message = "已重新安排所有已启用任务") }
+        _uiState.update { it.copy(message = tr("已重新安排所有已启用任务")) }
     }
 
     fun refreshLocalData() {
         reloadLocalData(uiState.value.selectedTaskId)
-        _uiState.update { it.copy(message = "已刷新本地数据") }
+        _uiState.update { it.copy(message = tr("已刷新本地数据")) }
     }
 
     fun clearLogs() {
         store.clearLogs()
         reloadLocalData(uiState.value.selectedTaskId)
-        _uiState.update { it.copy(message = "日志已清除") }
+        _uiState.update { it.copy(message = tr("日志已清除")) }
     }
 
     fun favoriteSelectedLocation() {
         val coord = parseCoord(uiState.value.taskForm.coord)
         if (coord == null) {
-            _uiState.update { it.copy(message = "请先在地图上选择位置") }
+            _uiState.update { it.copy(message = tr("请先在地图上选择位置")) }
             return
         }
         val saved = store.saveFavoriteLocation(
             FavoriteLocation(
                 id = 0L,
-                name = "地图选点 ${shortTime()}",
+                name = tr("地图选点 {0}", shortTime()),
                 lat = coord.first,
                 lng = coord.second,
             ),
@@ -330,7 +433,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update {
             it.copy(
                 taskForm = it.taskForm.copy(coord = "${saved.lng} ${saved.lat}"),
-                message = "已收藏选取位置",
+                message = tr("已收藏选取位置"),
             )
         }
     }
@@ -339,7 +442,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update {
             it.copy(
                 taskForm = it.taskForm.copy(coord = "${location.lng} ${location.lat}"),
-                message = "已选用 ${location.name}",
+                message = tr("已选用 {0}", location.name),
             )
         }
     }
@@ -347,11 +450,11 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteFavoriteLocation(location: FavoriteLocation) {
         store.deleteFavoriteLocation(location.id)
         reloadLocalData(uiState.value.selectedTaskId)
-        _uiState.update { it.copy(message = "已删除位置收藏") }
+        _uiState.update { it.copy(message = tr("已删除位置收藏")) }
     }
 
     fun locationPermissionDenied() {
-        _uiState.update { it.copy(message = "需要定位权限才能收藏当前位置") }
+        _uiState.update { it.copy(message = tr("需要定位权限才能收藏当前位置")) }
     }
 
     fun useCurrentLocationAndFavorite() {
@@ -363,7 +466,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
         ).filter { provider -> runCatching { locationManager.isProviderEnabled(provider) }.getOrDefault(false) }
 
         if (providers.isEmpty()) {
-            _uiState.update { it.copy(message = "定位服务未开启") }
+            _uiState.update { it.copy(message = tr("定位服务未开启")) }
             return
         }
 
@@ -388,21 +491,21 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         runCatching {
-            _uiState.update { it.copy(message = "正在获取当前位置...") }
+            _uiState.update { it.copy(message = tr("正在获取当前位置...")) }
             locationManager.requestSingleUpdate(provider, listener, Looper.getMainLooper())
             Handler(Looper.getMainLooper()).postDelayed(
                 {
                     if (!handled) {
                         handled = true
                         locationManager.removeUpdates(listener)
-                        _uiState.update { it.copy(message = "暂时无法获取当前位置，请稍后重试") }
+                        _uiState.update { it.copy(message = tr("暂时无法获取当前位置，请稍后重试")) }
                     }
                 },
                 15000L,
             )
         }.onFailure { throwable ->
             runCatching { locationManager.removeUpdates(listener) }
-            _uiState.update { it.copy(message = throwable.cleanMessage("无法获取当前位置")) }
+            _uiState.update { it.copy(message = throwable.cleanMessage(tr("无法获取当前位置"))) }
         }
     }
 
@@ -416,7 +519,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
             it.copy(
                 accentColor = color,
                 accentColorText = color.toHexColor(),
-                message = "主题色已更新",
+                message = tr("主题色已更新"),
             )
         }
     }
@@ -424,7 +527,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
     fun applyAccentColor() {
         val parsed = parseHexColor(uiState.value.accentColorText)
         if (parsed == null) {
-            _uiState.update { it.copy(message = "颜色格式应为 #RRGGBB 或 #AARRGGBB") }
+            _uiState.update { it.copy(message = tr("颜色格式应为 #RRGGBB 或 #AARRGGBB")) }
             return
         }
         selectAccentColor(parsed)
@@ -432,7 +535,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun runTasksNow(tasks: List<BjmfTask>, summary: Boolean) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isBusy = true, message = "正在执行签到...") }
+            _uiState.update { it.copy(isBusy = true, message = tr("正在执行签到...")) }
             val results = tasks.map { task ->
                 val result = service.runSign(task)
                 store.appendLog(
@@ -458,7 +561,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
                 it.copy(
                     isBusy = false,
                     screen = BjmfScreen.Logs,
-                    message = "签到执行完成：${results.joinToString { result -> result.status }}",
+                    message = tr("签到执行完成：成功 {0}，未完成 {1}", results.count { isSuccessStatus(it.status) }, results.count { !isSuccessStatus(it.status) }),
                 )
             }
         }
@@ -469,7 +572,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
         val saved = store.saveFavoriteLocation(
             FavoriteLocation(
                 id = 0L,
-                name = "当前位置 ${shortTime()}",
+                name = tr("当前位置 {0}", shortTime()),
                 lat = mapped.first.toCoordText(),
                 lng = mapped.second.toCoordText(),
             ),
@@ -478,7 +581,7 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update {
             it.copy(
                 taskForm = it.taskForm.copy(coord = "${saved.lng} ${saved.lat}"),
-                message = "已获取并收藏当前位置",
+                message = tr("已获取并收藏当前位置"),
             )
         }
     }
@@ -492,17 +595,17 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
                 runCatching { service.pollQrLogin(session) }
                     .onSuccess { account ->
                         if (account == null) {
-                            _uiState.update { it.copy(qrStatusText = "等待扫码确认...", isPolling = true) }
+                            _uiState.update { it.copy(qrStatusText = tr("等待扫码确认..."), isPolling = true) }
                         } else {
                             _uiState.update {
                                 it.copy(
                                     isPolling = false,
-                                    qrStatusText = "登录成功",
+                                    qrStatusText = tr("登录成功"),
                                     account = account,
                                     taskForm = accountFormOrEmpty(account),
                                     selectedTaskId = null,
                                     screen = BjmfScreen.Task,
-                                    message = "${account.userInfo.name} 已登录，可保存为本机任务",
+                                    message = tr("{0} 已登录，可保存为本机任务", account.userInfo.name),
                                 )
                             }
                             return@launch
@@ -512,15 +615,15 @@ class BjmfViewModel(application: Application) : AndroidViewModel(application) {
                         _uiState.update {
                             it.copy(
                                 isPolling = false,
-                                qrStatusText = "登录轮询失败",
-                                message = throwable.cleanMessage("登录轮询失败"),
+                                qrStatusText = tr("登录轮询失败"),
+                                message = throwable.cleanMessage(tr("登录轮询失败")),
                             )
                         }
                         return@launch
                     }
             }
             _uiState.update {
-                it.copy(isPolling = false, qrStatusText = "二维码已过期", message = "请重新获取二维码")
+                it.copy(isPolling = false, qrStatusText = tr("二维码已过期"), message = tr("请重新获取二维码"))
             }
         }
     }

@@ -4,6 +4,7 @@ options:
   deploymentTarget:
     iOS: "26.0"
   createIntermediateGroups: true
+  developmentLanguage: zh-Hans
 
 packages:
   SwiftSoup:
@@ -13,8 +14,8 @@ packages:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "1.3"
-    CURRENT_PROJECT_VERSION: "4"
+    MARKETING_VERSION: "1.4"
+    CURRENT_PROJECT_VERSION: "5"
 
 targets:
   BJMFSign:
@@ -22,14 +23,26 @@ targets:
     platform: iOS
     sources:
       - path: BJMFSign
+      - path: Shared
     dependencies:
       - package: SwiftSoup
+      - target: BJMFSignWidget
+    entitlements:
+      path: BJMFSign/Resources/BJMFSign.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.bjmf.sign.ios
     info:
       path: BJMFSign/Resources/Info.plist
       properties:
         CFBundleDisplayName: 班级魔方签到
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleAllowMixedLocalizations: true
+        CFBundleLocalizations:
+          - zh-Hans
+          - zh-Hant
+          - en
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
@@ -53,6 +66,33 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+
+  BJMFSignWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BJMFSignWidget
+      - path: Shared
+    entitlements:
+      path: BJMFSignWidget/BJMFSignWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.bjmf.sign.ios
+    info:
+      path: BJMFSignWidget/Info.plist
+      properties:
+        CFBundleDisplayName: 班级魔方签到
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bjmf.sign.ios.widget
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
 
 schemes:
   BJMFSign:

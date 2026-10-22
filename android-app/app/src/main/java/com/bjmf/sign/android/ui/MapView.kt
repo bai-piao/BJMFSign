@@ -21,6 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.bjmf.sign.android.ui.glass.LocalGlassDark
@@ -40,6 +42,7 @@ import kotlin.math.sin
 /** 高德瓦片地图选点（GCJ-02 坐标），深色模式下底图自动转暗。 */
 @Composable
 internal fun NativeMapPicker(
+    contentDescription: String,
     initialLat: Double,
     initialLng: Double,
     hasSelection: Boolean,
@@ -49,7 +52,9 @@ internal fun NativeMapPicker(
     val dark = LocalGlassDark.current
 
     AndroidView(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { this.contentDescription = contentDescription },
         factory = { context ->
             AmapTileView(context).apply {
                 onPointSelected = { lat, lng -> latestOnSelected(lat, lng) }

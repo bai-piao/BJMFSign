@@ -4,7 +4,7 @@ struct LoginView: View {
     let viewModel: BjmfViewModel
 
     var body: some View {
-        GlassCard(title: "微信扫码添加账号") {
+        GlassCard(title: tr("微信扫码添加账号")) {
             Text(viewModel.qrStatusText)
                 .foregroundStyle(.secondary)
 
@@ -17,9 +17,9 @@ struct LoginView: View {
                             .scaledToFit()
                             .padding(18)
                             .background(.white, in: .rect(cornerRadius: 20))
-                            .accessibilityLabel("微信登录二维码")
+                            .accessibilityLabel(tr("微信登录二维码"))
                     } else {
-                        Text("二维码解析失败")
+                        Text(tr("二维码解析失败"))
                             .frame(maxWidth: .infinity, minHeight: 120)
                     }
                 }
@@ -27,7 +27,7 @@ struct LoginView: View {
                 .frame(maxWidth: .infinity)
                 .transition(.scale.combined(with: .opacity))
 
-                Text("可截图后在微信中长按识别，或用另一台设备的微信扫描")
+                Text(tr("可截图后在微信中长按识别，或用另一台设备的微信扫描"))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -37,13 +37,13 @@ struct LoginView: View {
                     Button {
                         viewModel.createQrSession()
                     } label: {
-                        Label(viewModel.qrImageData == nil ? "获取二维码" : "重新获取", systemImage: "qrcode")
+                        Label(viewModel.qrImageData == nil ? tr("获取二维码") : tr("重新获取"), systemImage: "qrcode")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.glassProminent)
                     .disabled(viewModel.isBusy || viewModel.isPolling)
 
-                    Button("清除", role: .destructive) {
+                    Button(tr("清除"), role: .destructive) {
                         viewModel.clearQrSession()
                     }
                     .buttonStyle(.glass)
@@ -55,14 +55,14 @@ struct LoginView: View {
         .animation(.smooth, value: viewModel.qrImageData)
 
         if let user = viewModel.account?.userInfo {
-            GlassCard(title: "当前扫码账号") {
-                PreferenceRow(title: "姓名", value: user.name)
+            GlassCard(title: tr("当前扫码账号")) {
+                PreferenceRow(title: tr("姓名"), value: user.name)
                 RowDivider()
-                PreferenceRow(title: "班级", value: user.className)
+                PreferenceRow(title: tr("班级"), value: user.className)
                 RowDivider()
-                PreferenceRow(title: "班级 ID", value: user.classId)
+                PreferenceRow(title: tr("班级 ID"), value: user.classId)
                 RowDivider()
-                PreferenceRow(title: "班级码", value: user.classCode)
+                PreferenceRow(title: tr("班级码"), value: user.classCode)
             }
         }
     }

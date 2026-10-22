@@ -21,8 +21,16 @@ struct ContentView: View {
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        // 切换界面语言后重建视图树，让所有文案立即刷新。
+        .id(viewModel.language)
         .tint(viewModel.accent)
         .preferredColorScheme(viewModel.preferredColorScheme)
+        .fullScreenCover(isPresented: $viewModel.showOnboarding) {
+            OnboardingView(viewModel: viewModel)
+                .tint(viewModel.accent)
+                .preferredColorScheme(viewModel.preferredColorScheme)
+                .interactiveDismissDisabled()
+        }
     }
 
     private func page<Content: View>(_ screen: BjmfScreen, @ViewBuilder content: () -> Content) -> some View {
@@ -38,11 +46,12 @@ struct ContentView: View {
             .scrollDismissesKeyboard(.interactively)
             .background { GlassBackground(accent: viewModel.accent) }
             .navigationTitle(screen.largeTitle)
-            .navigationSubtitle("班级魔方签到")
+            .navigationSubtitle(tr("班级魔方签到"))
             .toolbar {
                 if viewModel.isBusy || viewModel.isPolling {
                     ToolbarItem(placement: .topBarTrailing) {
                         ProgressView()
+                            .accessibilityLabel(tr("正在处理"))
                     }
                 }
             }
@@ -60,10 +69,11 @@ struct StatusCard: View {
                 Circle()
                     .fill(viewModel.enabledCount > 0 ? Color.white : Color.white.opacity(0.45))
                     .frame(width: 10, height: 10)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("本机任务 \(viewModel.enabledCount)/\(viewModel.tasks.count)")
+                    Text(tr("本机任务 {0}/{1}", viewModel.enabledCount, viewModel.tasks.count))
                         .font(.headline)
-                    Text("登录、配置、签到、日志和定时提醒均在本机完成")
+                    Text(tr("登录、配置、签到、日志和定时提醒均在本机完成"))
                         .font(.subheadline)
                         .opacity(0.8)
                         .lineLimit(2)
@@ -78,5 +88,6 @@ struct StatusCard: View {
         }
         .foregroundStyle(.white)
         .animation(.smooth, value: viewModel.message)
+        .accessibilityElement(children: .combine)
     }
 }

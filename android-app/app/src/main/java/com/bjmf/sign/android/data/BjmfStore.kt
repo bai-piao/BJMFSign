@@ -81,6 +81,67 @@ class BjmfStore(context: Context) {
         prefs.edit().putString(KEY_THEME_MODE, mode).apply()
     }
 
+    fun loadLanguage(): String = prefs.getString(KEY_LANGUAGE, I18n.SYSTEM) ?: I18n.SYSTEM
+
+    fun saveLanguage(language: String) {
+        prefs.edit().putString(KEY_LANGUAGE, language).apply()
+    }
+
+    fun loadDynamicColor(): Boolean = prefs.getBoolean(KEY_DYNAMIC_COLOR, false)
+
+    fun saveDynamicColor(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_DYNAMIC_COLOR, enabled).apply()
+    }
+
+    fun isOnboardingDone(): Boolean = prefs.getBoolean(KEY_ONBOARDING_DONE, false)
+
+    fun setOnboardingDone(done: Boolean) {
+        prefs.edit().putBoolean(KEY_ONBOARDING_DONE, done).apply()
+    }
+
+    /** 备份明文：任务、位置收藏与界面设置（不含日志）。字段与 iOS 端一致。 */
+    fun buildBackupJson(): String {
+        val tasks = JSONArray().apply { loadTasks().forEach { put(it.toJson()) } }
+        val locations = JSONArray().apply { loadFavoriteLocations().forEach { put(it.toJson()) } }
+        val settings = JSONObject()
+            .put("accentColor", loadAccentColor())
+            .put("themeMode", loadThemeMode())
+            .put("language", loadLanguage())
+            .put("dynamicColor", loadDynamicColor())
+        return JSONObject()
+            .put("format", BackupCrypto.FORMAT)
+            .put("version", BackupCrypto.VERSION)
+            .put("platform", "android")
+            .put("exportedAt", System.currentTimeMillis())
+            .put("tasks", tasks)
+            .put("favoriteLocations", locations)
+            .put("settings", settings)
+            .toString()
+    }
+
+    data class RestoreSummary(val tasks: Int, val locations: Int)
+
+    /** 用备份替换本机任务与位置收藏，并恢复界面设置。 */
+    fun restoreBackupJson(json: String): RestoreSummary {
+        val root = JSONObject(json)
+        if (root.optString("format") != BackupCrypto.FORMAT) throw BackupCrypto.InvalidFileException()
+        val tasks = root.optJSONArray("tasks").let { array ->
+            buildList { for (i in 0 until (array?.length() ?: 0)) array?.optJSONObject(i)?.toTaskOrNull()?.let(::add) }
+        }
+        val locations = root.optJSONArray("favoriteLocations").let { array ->
+            buildList { for (i in 0 until (array?.length() ?: 0)) array?.optJSONObject(i)?.toFavoriteLocationOrNull()?.let(::add) }
+        }
+        saveTasks(tasks)
+        saveFavoriteLocations(locations)
+        root.optJSONObject("settings")?.let { settings ->
+            if (settings.has("accentColor")) saveAccentColor(settings.optLong("accentColor", DEFAULT_ACCENT_COLOR))
+            settings.optString("themeMode").takeIf { it.isNotBlank() }?.let(::saveThemeMode)
+            settings.optString("language").takeIf { it.isNotBlank() }?.let(::saveLanguage)
+            if (settings.has("dynamicColor")) saveDynamicColor(settings.optBoolean("dynamicColor"))
+        }
+        return RestoreSummary(tasks.size, locations.size)
+    }
+
     fun appendLog(log: TaskLog) {
         val logs = loadLogs(limit = Int.MAX_VALUE).toMutableList()
         logs.add(0, log)
@@ -217,6 +278,9 @@ class BjmfStore(context: Context) {
         private const val KEY_FAVORITE_LOCATIONS = "favorite_locations"
         private const val KEY_ACCENT_COLOR = "accent_color"
         private const val KEY_THEME_MODE = "theme_mode"
+        private const val KEY_LANGUAGE = "language"
+        private const val KEY_DYNAMIC_COLOR = "dynamic_color"
+        private const val KEY_ONBOARDING_DONE = "onboarding_done"
         const val THEME_SYSTEM = "system"
         const val THEME_LIGHT = "light"
         const val THEME_DARK = "dark"

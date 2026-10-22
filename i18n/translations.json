@@ -1,0 +1,1188 @@
+{
+  "_extraKeys": [
+    "登录",
+    "任务",
+    "日志",
+    "管理"
+  ],
+  "登录": {
+    "zh-Hant": "登入",
+    "en": "Login"
+  },
+  "任务": {
+    "zh-Hant": "任務",
+    "en": "Tasks"
+  },
+  "日志": {
+    "zh-Hant": "日誌",
+    "en": "Logs"
+  },
+  "管理": {
+    "zh-Hant": "管理",
+    "en": "Settings"
+  },
+  "Android 12+ 需要此权限才能精确定时": {
+    "zh-Hant": "Android 12+ 需要此權限才能精確定時",
+    "en": "Required on Android 12+ for exact scheduling"
+  },
+  "Android 定时签到": {
+    "zh-Hant": "Android 定時簽到",
+    "en": "Android scheduled sign-in"
+  },
+  "Cookie（扫码登录后自动填入）": {
+    "zh-Hant": "Cookie（掃碼登入後自動填入）",
+    "en": "Cookie (filled in after QR login)"
+  },
+  "HEX 颜色": {
+    "zh-Hant": "HEX 顏色",
+    "en": "HEX color"
+  },
+  "Qmsg酱 Key（QQ）": {
+    "zh-Hant": "Qmsg醬 Key（QQ）",
+    "en": "Qmsg Key (QQ)"
+  },
+  "Server酱 Key（微信）": {
+    "zh-Hant": "Server醬 Key（微信）",
+    "en": "ServerChan Key (WeChat)"
+  },
+  "yyyy年M月": {
+    "zh-Hant": "yyyy年M月",
+    "en": "MMMM yyyy"
+  },
+  "{0} · {1} 条": {
+    "zh-Hant": "{0} · {1} 條",
+    "en": "{0} · {1} entries"
+  },
+  "{0} 已登录": {
+    "zh-Hant": "{0} 已登入",
+    "en": "{0} signed in"
+  },
+  "{0} 已登录，可保存为本机任务": {
+    "zh-Hant": "{0} 已登入，可儲存為本機任務",
+    "en": "{0} is logged in and can be saved as a task"
+  },
+  "{0} 签到成功": {
+    "zh-Hant": "{0} 簽到成功",
+    "en": "{0}: sign-in succeeded"
+  },
+  "{0} 签到未完成": {
+    "zh-Hant": "{0} 簽到未完成",
+    "en": "{0}: sign-in not completed"
+  },
+  "{0} 至 {1}": {
+    "zh-Hant": "{0} 至 {1}",
+    "en": "{0} to {1}"
+  },
+  "{0} 起": {
+    "zh-Hant": "{0} 起",
+    "en": "From {0}"
+  },
+  "{0}…（共 {1} 字符）": {
+    "zh-Hant": "{0}…（共 {1} 字元）",
+    "en": "{0}… ({1} characters)"
+  },
+  "{0}年": {
+    "zh-Hant": "{0}年",
+    "en": "{0}"
+  },
+  "{0}日": {
+    "zh-Hant": "{0}日",
+    "en": "{0}"
+  },
+  "{0}月": {
+    "zh-Hant": "{0}月",
+    "en": "{0}"
+  },
+  "{0}：成功 {1}，失败 {2}": {
+    "zh-Hant": "{0}：成功 {1}，失敗 {2}",
+    "en": "{0}: {1} succeeded, {2} failed"
+  },
+  "{0}：无记录": {
+    "zh-Hant": "{0}：無記錄",
+    "en": "{0}: no records"
+  },
+  "一": {
+    "zh-Hant": "一",
+    "en": "Mon"
+  },
+  "二": {
+    "zh-Hant": "二",
+    "en": "Tue"
+  },
+  "三": {
+    "zh-Hant": "三",
+    "en": "Wed"
+  },
+  "四": {
+    "zh-Hant": "四",
+    "en": "Thu"
+  },
+  "五": {
+    "zh-Hant": "五",
+    "en": "Fri"
+  },
+  "六": {
+    "zh-Hant": "六",
+    "en": "Sat"
+  },
+  "日": {
+    "zh-Hant": "日",
+    "en": "Sun"
+  },
+  "上一步": {
+    "zh-Hant": "上一步",
+    "en": "Back"
+  },
+  "上个月": {
+    "zh-Hant": "上個月",
+    "en": "Previous month"
+  },
+  "下一步": {
+    "zh-Hant": "下一步",
+    "en": "Next"
+  },
+  "下个月": {
+    "zh-Hant": "下個月",
+    "en": "Next month"
+  },
+  "下次执行：{0}": {
+    "zh-Hant": "下次執行：{0}",
+    "en": "Next run: {0}"
+  },
+  "不受电池优化限制": {
+    "zh-Hant": "不受電池最佳化限制",
+    "en": "Not restricted by battery optimization"
+  },
+  "不是有效的备份文件": {
+    "zh-Hant": "不是有效的備份檔案",
+    "en": "Not a valid backup file"
+  },
+  "不限": {
+    "zh-Hant": "不限",
+    "en": "Any"
+  },
+  "两次输入的密码不一致": {
+    "zh-Hant": "兩次輸入的密碼不一致",
+    "en": "Passwords do not match"
+  },
+  "主题色 {0}": {
+    "zh-Hant": "主題色 {0}",
+    "en": "Accent color {0}"
+  },
+  "主题色已更新": {
+    "zh-Hant": "主題色已更新",
+    "en": "Accent color updated"
+  },
+  "二维码创建失败": {
+    "zh-Hant": "QR 碼建立失敗",
+    "en": "Failed to create QR code"
+  },
+  "二维码已过期": {
+    "zh-Hant": "QR 碼已過期",
+    "en": "QR code expired"
+  },
+  "二维码解析失败": {
+    "zh-Hant": "QR 碼解析失敗",
+    "en": "Failed to parse QR code"
+  },
+  "今天 {0}": {
+    "zh-Hant": "今天 {0}",
+    "en": "Today {0}"
+  },
+  "今天": {
+    "zh-Hant": "今天",
+    "en": "Today"
+  },
+  "任务 Cookie、坐标和通知 Key 均保存在本机 App 私有存储中。卸载 App 会清除这些数据。": {
+    "zh-Hant": "任務 Cookie、座標和通知 Key 均儲存在本機 App 私有儲存中。解除安裝 App 會清除這些資料。",
+    "en": "Task cookies, coordinates and notification keys are stored in the app's private storage on this device. Uninstalling the app removes them."
+  },
+  "任务已保存，并已安排下一次自动签到": {
+    "zh-Hant": "任務已儲存，並已安排下一次自動簽到",
+    "en": "Task saved and next automatic sign-in scheduled"
+  },
+  "任务已停用": {
+    "zh-Hant": "任務已停用",
+    "en": "Task disabled"
+  },
+  "任务已删除": {
+    "zh-Hant": "任務已刪除",
+    "en": "Task deleted"
+  },
+  "任务已启用": {
+    "zh-Hant": "任務已啟用",
+    "en": "Task enabled"
+  },
+  "任务总数": {
+    "zh-Hant": "任務總數",
+    "en": "Tasks"
+  },
+  "位置 {0}, {1} · 精度 {2}m": {
+    "zh-Hant": "位置 {0}, {1} · 精度 {2}m",
+    "en": "Location {0}, {1} · accuracy {2}m"
+  },
+  "位置收藏": {
+    "zh-Hant": "位置收藏",
+    "en": "Saved locations"
+  },
+  "使用引导": {
+    "zh-Hant": "使用引導",
+    "en": "Getting started"
+  },
+  "使用系统 Monet 动态取色，主题色随壁纸变化": {
+    "zh-Hant": "使用系統 Monet 動態取色，主題色隨桌布變化",
+    "en": "Use Monet dynamic color so the accent follows your wallpaper"
+  },
+  "使用系统闹钟在设定时间后台自动执行。Android 12+ 请允许本 App 的「闹钟和提醒」权限，并关闭电池优化，以保证准时执行。": {
+    "zh-Hant": "使用系統鬧鐘在設定時間背景自動執行。Android 12+ 請允許本 App 的「鬧鐘和提醒」權限，並關閉電池最佳化，以保證準時執行。",
+    "en": "Tasks run in the background at the scheduled times using system alarms. On Android 12+, allow \"Alarms & reminders\" for this app and turn off battery optimization so they run on time."
+  },
+  "保存任务": {
+    "zh-Hant": "儲存任務",
+    "en": "Save task"
+  },
+  "保存修改": {
+    "zh-Hant": "儲存修改",
+    "en": "Save changes"
+  },
+  "允许 App 在后台准时运行": {
+    "zh-Hant": "允許 App 在背景準時執行",
+    "en": "Let the app run on time in the background"
+  },
+  "允许通知": {
+    "zh-Hant": "允許通知",
+    "en": "Allow notifications"
+  },
+  "全部": {
+    "zh-Hant": "全部",
+    "en": "All"
+  },
+  "全部任务": {
+    "zh-Hant": "全部任務",
+    "en": "All tasks"
+  },
+  "再次完成扫码登录、通知权限和电池优化设置": {
+    "zh-Hant": "再次完成掃碼登入、通知權限和電池最佳化設定",
+    "en": "Go through QR login, notifications and battery settings again"
+  },
+  "再次输入密码": {
+    "zh-Hant": "再次輸入密碼",
+    "en": "Confirm password"
+  },
+  "删除": {
+    "zh-Hant": "刪除",
+    "en": "Delete"
+  },
+  "删除任务": {
+    "zh-Hant": "刪除任務",
+    "en": "Delete task"
+  },
+  "刷新": {
+    "zh-Hant": "重新整理",
+    "en": "Refresh"
+  },
+  "加载更多（剩余 {0} 条）": {
+    "zh-Hant": "載入更多（剩餘 {0} 條）",
+    "en": "Load more ({0} remaining)"
+  },
+  "去设置": {
+    "zh-Hant": "去設定",
+    "en": "Open settings"
+  },
+  "取消": {
+    "zh-Hant": "取消",
+    "en": "Cancel"
+  },
+  "可截图后在微信「扫一扫 → 相册」中识别，或用另一台设备的微信扫描": {
+    "zh-Hant": "可截圖後在微信「掃一掃 → 相簿」中識別，或用另一台裝置的微信掃描",
+    "en": "Take a screenshot and scan it in WeChat via Scan → Album, or scan it with WeChat on another device"
+  },
+  "可收藏当前位置或地图选点": {
+    "zh-Hant": "可收藏目前位置或地圖選點",
+    "en": "Save your current location or a point picked on the map"
+  },
+  "后台自动签到完成后，会用通知告诉你结果；失败时会说明原因。": {
+    "zh-Hant": "背景自動簽到完成後，會用通知告訴你結果；失敗時會說明原因。",
+    "en": "After each automatic sign-in you'll get a notification with the result, including the reason if it failed."
+  },
+  "启用任务": {
+    "zh-Hant": "啟用任務",
+    "en": "Enable task"
+  },
+  "地图选点 {0}": {
+    "zh-Hant": "地圖選點 {0}",
+    "en": "Map point {0}"
+  },
+  "地图选点，点按地图设置签到位置": {
+    "zh-Hant": "地圖選點，點按地圖設定簽到位置",
+    "en": "Map picker. Tap the map to set the sign-in location"
+  },
+  "坐标和执行时间格式不正确": {
+    "zh-Hant": "座標和執行時間格式不正確",
+    "en": "Invalid coordinates or run times"
+  },
+  "基本信息": {
+    "zh-Hant": "基本資訊",
+    "en": "Basics"
+  },
+  "备份与迁移": {
+    "zh-Hant": "備份與遷移",
+    "en": "Backup & transfer"
+  },
+  "备份已导出，请妥善保管文件和密码": {
+    "zh-Hant": "備份已匯出，請妥善保管檔案和密碼",
+    "en": "Backup exported. Keep the file and password safe"
+  },
+  "复制日志": {
+    "zh-Hant": "複製日誌",
+    "en": "Copy log"
+  },
+  "复制给开发者": {
+    "zh-Hant": "複製給開發者",
+    "en": "Copy for developer"
+  },
+  "外观": {
+    "zh-Hant": "外觀",
+    "en": "Appearance"
+  },
+  "失败": {
+    "zh-Hant": "失敗",
+    "en": "Failed"
+  },
+  "姓名": {
+    "zh-Hant": "姓名",
+    "en": "Name"
+  },
+  "姓名、班级 ID 和 Cookie 不能为空": {
+    "zh-Hant": "姓名、班級 ID 和 Cookie 不能為空",
+    "en": "Name, class ID and cookie are required"
+  },
+  "完成": {
+    "zh-Hant": "完成",
+    "en": "Done"
+  },
+  "定位并收藏": {
+    "zh-Hant": "定位並收藏",
+    "en": "Locate and save"
+  },
+  "定位服务未开启": {
+    "zh-Hant": "定位服務未開啟",
+    "en": "Location services are off"
+  },
+  "定位精度（米）": {
+    "zh-Hant": "定位精度（米）",
+    "en": "Accuracy (m)"
+  },
+  "定时说明": {
+    "zh-Hant": "定時說明",
+    "en": "About scheduling"
+  },
+  "密码": {
+    "zh-Hant": "密碼",
+    "en": "Password"
+  },
+  "密码至少 6 位": {
+    "zh-Hant": "密碼至少 6 位",
+    "en": "Password must be at least 6 characters"
+  },
+  "密码错误或文件已损坏": {
+    "zh-Hant": "密碼錯誤或檔案已損壞",
+    "en": "Wrong password or damaged file"
+  },
+  "导入会替换本机现有的任务和位置收藏。": {
+    "zh-Hant": "匯入會替換本機現有的任務和位置收藏。",
+    "en": "Importing replaces the tasks and saved locations on this device."
+  },
+  "导入备份": {
+    "zh-Hant": "匯入備份",
+    "en": "Import backup"
+  },
+  "导入失败": {
+    "zh-Hant": "匯入失敗",
+    "en": "Import failed"
+  },
+  "导入失败：{0}": {
+    "zh-Hant": "匯入失敗：{0}",
+    "en": "Import failed: {0}"
+  },
+  "导入时需要输入此密码，请牢记。至少 6 位。": {
+    "zh-Hant": "匯入時需要輸入此密碼，請牢記。至少 6 位。",
+    "en": "You'll need this password to import. At least 6 characters."
+  },
+  "导出备份": {
+    "zh-Hant": "匯出備份",
+    "en": "Export backup"
+  },
+  "导出失败：{0}": {
+    "zh-Hant": "匯出失敗：{0}",
+    "en": "Export failed: {0}"
+  },
+  "尚未允许通知": {
+    "zh-Hant": "尚未允許通知",
+    "en": "Notifications not allowed"
+  },
+  "尚未创建扫码会话": {
+    "zh-Hant": "尚未建立掃碼會話",
+    "en": "No QR session yet"
+  },
+  "尚未添加执行时间": {
+    "zh-Hant": "尚未新增執行時間",
+    "en": "No run times yet"
+  },
+  "展开详情": {
+    "zh-Hant": "展開詳情",
+    "en": "Show details"
+  },
+  "已停用": {
+    "zh-Hant": "已停用",
+    "en": "Disabled"
+  },
+  "已允许通知": {
+    "zh-Hant": "已允許通知",
+    "en": "Notifications allowed"
+  },
+  "已关闭跟随壁纸取色": {
+    "zh-Hant": "已關閉跟隨桌布取色",
+    "en": "Wallpaper colors turned off"
+  },
+  "已切换为浅色模式": {
+    "zh-Hant": "已切換為淺色模式",
+    "en": "Switched to light mode"
+  },
+  "已切换为深色模式": {
+    "zh-Hant": "已切換為深色模式",
+    "en": "Switched to dark mode"
+  },
+  "已删除位置收藏": {
+    "zh-Hant": "已刪除位置收藏",
+    "en": "Saved location removed"
+  },
+  "已刷新本地数据": {
+    "zh-Hant": "已重新整理本地資料",
+    "en": "Local data refreshed"
+  },
+  "已复制日志": {
+    "zh-Hant": "已複製日誌",
+    "en": "Log copied"
+  },
+  "已复制诊断信息": {
+    "zh-Hant": "已複製診斷資訊",
+    "en": "Diagnostics copied"
+  },
+  "已导入 {0} 个任务、{1} 个位置收藏": {
+    "zh-Hant": "已匯入 {0} 個任務、{1} 個位置收藏",
+    "en": "Imported {0} tasks and {1} saved locations"
+  },
+  "已开启跟随壁纸取色": {
+    "zh-Hant": "已開啟跟隨桌布取色",
+    "en": "Wallpaper colors turned on"
+  },
+  "已收藏选取位置": {
+    "zh-Hant": "已收藏選取位置",
+    "en": "Picked location saved"
+  },
+  "已清除扫码会话": {
+    "zh-Hant": "已清除掃碼會話",
+    "en": "QR session cleared"
+  },
+  "已用当前登录账号填充任务": {
+    "zh-Hant": "已用目前登入帳號填充任務",
+    "en": "Task filled with the logged-in account"
+  },
+  "已签到": {
+    "zh-Hant": "已簽到",
+    "en": "Already signed"
+  },
+  "已获取并收藏当前位置": {
+    "zh-Hant": "已獲取並收藏目前位置",
+    "en": "Current location saved"
+  },
+  "已设为跟随系统": {
+    "zh-Hant": "已設為跟隨系統",
+    "en": "Following system appearance"
+  },
+  "已载入 {0} 的任务": {
+    "zh-Hant": "已載入 {0} 的任務",
+    "en": "Loaded task for {0}"
+  },
+  "已过生效日期，不再执行": {
+    "zh-Hant": "已過生效日期，不再執行",
+    "en": "Past its end date, no longer runs"
+  },
+  "已选中 {0}": {
+    "zh-Hant": "已選中 {0}",
+    "en": "{0} selected"
+  },
+  "已选择：经度 {0}，纬度 {1}": {
+    "zh-Hant": "已選擇：經度 {0}，緯度 {1}",
+    "en": "Selected: longitude {0}, latitude {1}"
+  },
+  "已选用 {0}": {
+    "zh-Hant": "已選用 {0}",
+    "en": "Using {0}"
+  },
+  "已重新安排所有已启用任务": {
+    "zh-Hant": "已重新安排所有已啟用任務",
+    "en": "All enabled tasks rescheduled"
+  },
+  "应用": {
+    "zh-Hant": "套用",
+    "en": "Apply"
+  },
+  "开始日期": {
+    "zh-Hant": "開始日期",
+    "en": "Start date"
+  },
+  "异常": {
+    "zh-Hant": "異常",
+    "en": "Error"
+  },
+  "当前主题色": {
+    "zh-Hant": "目前主題色",
+    "en": "Current accent color"
+  },
+  "当前位置 {0}": {
+    "zh-Hant": "目前位置 {0}",
+    "en": "Current location {0}"
+  },
+  "当前扫码账号": {
+    "zh-Hant": "目前掃碼帳號",
+    "en": "Logged-in account"
+  },
+  "当前没有进行中的签到，或不在签到时间内": {
+    "zh-Hant": "目前沒有進行中的簽到，或不在簽到時間內",
+    "en": "No active sign-in right now, or outside the sign-in window"
+  },
+  "微信扫码添加账号": {
+    "zh-Hant": "微信掃碼新增帳號",
+    "en": "Add account with WeChat QR"
+  },
+  "微信登录二维码": {
+    "zh-Hant": "微信登入QR 碼",
+    "en": "WeChat login QR code"
+  },
+  "成功": {
+    "zh-Hant": "成功",
+    "en": "Success"
+  },
+  "打开": {
+    "zh-Hant": "開啟",
+    "en": "Open"
+  },
+  "执行全部": {
+    "zh-Hant": "執行全部",
+    "en": "Run all"
+  },
+  "执行出错，请复制给开发者排查": {
+    "zh-Hant": "執行出錯，請複製給開發者排查",
+    "en": "Something went wrong. Copy the details for the developer"
+  },
+  "执行日志": {
+    "zh-Hant": "執行日誌",
+    "en": "Run logs"
+  },
+  "执行时间": {
+    "zh-Hant": "執行時間",
+    "en": "Run times"
+  },
+  "执行概览": {
+    "zh-Hant": "執行概覽",
+    "en": "Overview"
+  },
+  "扫码登录": {
+    "zh-Hant": "掃碼登入",
+    "en": "QR login"
+  },
+  "把任务、位置收藏和界面设置导出为加密文件，换手机时直接导入。Android 与 iOS 通用。": {
+    "zh-Hant": "把任務、位置收藏和介面設定匯出為加密檔案，換手機時直接匯入。Android 與 iOS 通用。",
+    "en": "Export tasks, saved locations and appearance settings to an encrypted file and import it on your new phone. Works across Android and iOS."
+  },
+  "收藏选点": {
+    "zh-Hant": "收藏選點",
+    "en": "Save point"
+  },
+  "收起详情": {
+    "zh-Hant": "收起詳情",
+    "en": "Hide details"
+  },
+  "新建": {
+    "zh-Hant": "新增",
+    "en": "New"
+  },
+  "新建任务": {
+    "zh-Hant": "新增任務",
+    "en": "New task"
+  },
+  "新建任务：已填入当前扫码账号": {
+    "zh-Hant": "新增任務：已填入目前掃碼帳號",
+    "en": "New task: filled with the logged-in account"
+  },
+  "新建任务：请填写信息或先扫码登录": {
+    "zh-Hant": "新增任務：請填寫資訊或先掃碼登入",
+    "en": "New task: fill in the details or log in with QR first"
+  },
+  "无法写入所选文件": {
+    "zh-Hant": "無法寫入所選檔案",
+    "en": "Can't write to the selected file"
+  },
+  "无法获取当前位置": {
+    "zh-Hant": "無法獲取目前位置",
+    "en": "Can't get current location"
+  },
+  "无法读取所选文件": {
+    "zh-Hant": "無法讀取所選檔案",
+    "en": "Can't read the selected file"
+  },
+  "无签到": {
+    "zh-Hant": "無簽到",
+    "en": "No sign-in"
+  },
+  "无记录": {
+    "zh-Hant": "無記錄",
+    "en": "No records"
+  },
+  "日志已清除": {
+    "zh-Hant": "日誌已清除",
+    "en": "Logs cleared"
+  },
+  "日志数量": {
+    "zh-Hant": "日誌數量",
+    "en": "Logs"
+  },
+  "明天 {0}": {
+    "zh-Hant": "明天 {0}",
+    "en": "Tomorrow {0}"
+  },
+  "昨天": {
+    "zh-Hant": "昨天",
+    "en": "Yesterday"
+  },
+  "显示全部": {
+    "zh-Hant": "顯示全部",
+    "en": "Show all"
+  },
+  "暂无执行日志": {
+    "zh-Hant": "暫無執行日誌",
+    "en": "No run logs yet"
+  },
+  "暂时无法获取当前位置，请稍后重试": {
+    "zh-Hant": "暫時無法獲取目前位置，請稍後重試",
+    "en": "Can't get your location right now. Try again later"
+  },
+  "服务器暂时不可用（HTTP {0}），请稍后重试": {
+    "zh-Hant": "伺服器暫時不可用（HTTP {0}），請稍後重試",
+    "en": "Server temporarily unavailable (HTTP {0}). Try again later"
+  },
+  "未填写": {
+    "zh-Hant": "未填寫",
+    "en": "Not set"
+  },
+  "未开始": {
+    "zh-Hant": "未開始",
+    "en": "Not started"
+  },
+  "未知": {
+    "zh-Hant": "未知",
+    "en": "Unknown"
+  },
+  "未设置执行时间": {
+    "zh-Hant": "未設定執行時間",
+    "en": "No run times set"
+  },
+  "本机任务 {0}/{1}": {
+    "zh-Hant": "本機任務 {0}/{1}",
+    "en": "Tasks {0}/{1}"
+  },
+  "本机任务": {
+    "zh-Hant": "本機任務",
+    "en": "Tasks"
+  },
+  "本机私有存储": {
+    "zh-Hant": "本機私有儲存",
+    "en": "Private app storage"
+  },
+  "本机管理": {
+    "zh-Hant": "本機管理",
+    "en": "Device"
+  },
+  "正在加密导出...": {
+    "zh-Hant": "正在加密匯出...",
+    "en": "Encrypting and exporting..."
+  },
+  "正在执行签到...": {
+    "zh-Hant": "正在執行簽到...",
+    "en": "Signing in..."
+  },
+  "正在获取当前位置...": {
+    "zh-Hant": "正在獲取目前位置...",
+    "en": "Getting current location..."
+  },
+  "正在获取微信扫码二维码...": {
+    "zh-Hant": "正在獲取微信掃碼QR 碼...",
+    "en": "Getting WeChat QR code..."
+  },
+  "正在解密导入...": {
+    "zh-Hant": "正在解密匯入...",
+    "en": "Decrypting and importing..."
+  },
+  "正在跟随壁纸": {
+    "zh-Hant": "正在跟隨桌布",
+    "en": "Following wallpaper"
+  },
+  "没有已启用的任务": {
+    "zh-Hant": "沒有已啟用的任務",
+    "en": "No enabled tasks"
+  },
+  "没有符合筛选条件的日志": {
+    "zh-Hant": "沒有符合篩選條件的日誌",
+    "en": "No logs match the filter"
+  },
+  "浅色": {
+    "zh-Hant": "淺色",
+    "en": "Light"
+  },
+  "深色": {
+    "zh-Hant": "深色",
+    "en": "Dark"
+  },
+  "深色模式可跟随系统，或固定为浅色 / 深色": {
+    "zh-Hant": "深色模式可跟隨系統，或固定為淺色 / 深色",
+    "en": "Follow the system, or always use light or dark"
+  },
+  "添加": {
+    "zh-Hant": "新增",
+    "en": "Add"
+  },
+  "添加执行时间": {
+    "zh-Hant": "新增執行時間",
+    "en": "Add run time"
+  },
+  "添加时间": {
+    "zh-Hant": "新增時間",
+    "en": "Add time"
+  },
+  "清除": {
+    "zh-Hant": "清除",
+    "en": "Clear"
+  },
+  "清除日志": {
+    "zh-Hant": "清除日誌",
+    "en": "Clear logs"
+  },
+  "点击地图选择签到点": {
+    "zh-Hant": "點選地圖選擇簽到點",
+    "en": "Tap the map to pick the sign-in point"
+  },
+  "点按时间可移除": {
+    "zh-Hant": "點按時間可移除",
+    "en": "Tap a time to remove it"
+  },
+  "点按某一天查看当天的执行详情": {
+    "zh-Hant": "點按某一天檢視當天的執行詳情",
+    "en": "Tap a day to see its runs"
+  },
+  "点按选择日期，留空表示不限制": {
+    "zh-Hant": "點按選擇日期，留空表示不限制",
+    "en": "Tap to pick a date. Leave empty for no limit"
+  },
+  "班级 ID": {
+    "zh-Hant": "班級 ID",
+    "en": "Class ID"
+  },
+  "班级 {0}": {
+    "zh-Hant": "班級 {0}",
+    "en": "Class {0}"
+  },
+  "班级": {
+    "zh-Hant": "班級",
+    "en": "Class"
+  },
+  "班级码": {
+    "zh-Hant": "班級碼",
+    "en": "Class code"
+  },
+  "班级魔方签到": {
+    "zh-Hant": "班級魔方簽到",
+    "en": "BJMF Sign"
+  },
+  "生效 {0}": {
+    "zh-Hant": "生效 {0}",
+    "en": "Active {0}"
+  },
+  "生效日期": {
+    "zh-Hant": "生效日期",
+    "en": "Active dates"
+  },
+  "用微信扫描二维码登录班级魔方，App 会自动获取账号和班级信息。也可以稍后在「登录」页完成。": {
+    "zh-Hant": "用微信掃描QR 碼登入班級魔方，App 會自動獲取帳號和班級資訊。也可以稍後在「登入」頁完成。",
+    "en": "Scan the QR code with WeChat to log in to BJMF. The app fetches your account and classes automatically. You can also do this later on the Login tab."
+  },
+  "用扫码账号": {
+    "zh-Hant": "用掃碼帳號",
+    "en": "Use logged-in account"
+  },
+  "电池优化": {
+    "zh-Hant": "電池最佳化",
+    "en": "Battery optimization"
+  },
+  "界面取色": {
+    "zh-Hant": "介面取色",
+    "en": "Colors"
+  },
+  "界面语言已切换": {
+    "zh-Hant": "介面語言已切換",
+    "en": "Language changed"
+  },
+  "界面语言，跟随系统时按系统语言显示": {
+    "zh-Hant": "介面語言，跟隨系統時按系統語言顯示",
+    "en": "App language. Follow system uses your device language"
+  },
+  "登录、配置、签到、日志和定时任务均在本机完成": {
+    "zh-Hant": "登入、配置、簽到、日誌和定時任務均在本機完成",
+    "en": "Login, setup, sign-in, logs and scheduling all happen on this device"
+  },
+  "登录凭证": {
+    "zh-Hant": "登入憑證",
+    "en": "Credentials"
+  },
+  "登录已失效（Cookie 过期），请重新扫码登录并更新任务": {
+    "zh-Hant": "登入已失效（Cookie 過期），請重新掃碼登入並更新任務",
+    "en": "Login expired (cookie no longer valid). Log in with QR again and update the task"
+  },
+  "登录成功": {
+    "zh-Hant": "登入成功",
+    "en": "Logged in"
+  },
+  "登录轮询失败": {
+    "zh-Hant": "登入狀態查詢失敗",
+    "en": "Login check failed"
+  },
+  "确定": {
+    "zh-Hant": "確定",
+    "en": "OK"
+  },
+  "确定删除「{0}」？该任务的定时也会一并取消。": {
+    "zh-Hant": "確定刪除「{0}」？該任務的定時也會一併取消。",
+    "en": "Delete \"{0}\"? Its schedule will be cancelled too."
+  },
+  "确定清除全部 {0} 条执行日志？": {
+    "zh-Hant": "確定清除全部 {0} 條執行日誌？",
+    "en": "Clear all {0} run logs?"
+  },
+  "立即签到": {
+    "zh-Hant": "立即簽到",
+    "en": "Sign in now"
+  },
+  "第 {0} 步，共 {1} 步": {
+    "zh-Hant": "第 {0} 步，共 {1} 步",
+    "en": "Step {0} of {1}"
+  },
+  "等待扫码确认...": {
+    "zh-Hant": "等待掃碼確認...",
+    "en": "Waiting for scan confirmation..."
+  },
+  "签到任务": {
+    "zh-Hant": "簽到任務",
+    "en": "Sign-in task"
+  },
+  "签到位置": {
+    "zh-Hant": "簽到位置",
+    "en": "Sign-in location"
+  },
+  "签到尚未开始，请稍后再试": {
+    "zh-Hant": "簽到尚未開始，請稍後再試",
+    "en": "Sign-in hasn't started yet. Try again later"
+  },
+  "签到成功": {
+    "zh-Hant": "簽到成功",
+    "en": "Signed in"
+  },
+  "签到执行完成：成功 {0}，未完成 {1}": {
+    "zh-Hant": "簽到執行完成：成功 {0}，未完成 {1}",
+    "en": "Sign-in finished: {0} succeeded, {1} not completed"
+  },
+  "签到结果": {
+    "zh-Hant": "簽到結果",
+    "en": "Sign-in results"
+  },
+  "系统的省电策略可能推迟或取消定时签到。关闭电池优化、允许精确闹钟后，签到会更准时。": {
+    "zh-Hant": "系統的省電策略可能推遲或取消定時簽到。關閉電池最佳化、允許精確鬧鐘後，簽到會更準時。",
+    "en": "Power saving can delay or cancel scheduled sign-ins. Turn off battery optimization and allow exact alarms so they run on time."
+  },
+  "结束日期": {
+    "zh-Hant": "結束日期",
+    "en": "End date"
+  },
+  "编辑": {
+    "zh-Hant": "編輯",
+    "en": "Edit"
+  },
+  "编辑任务": {
+    "zh-Hant": "編輯任務",
+    "en": "Edit task"
+  },
+  "网络连接失败，请检查网络后重试": {
+    "zh-Hant": "網路連線失敗，請檢查網路後重試",
+    "en": "Network error. Check your connection and try again"
+  },
+  "至 {0}": {
+    "zh-Hant": "至 {0}",
+    "en": "Until {0}"
+  },
+  "获取二维码": {
+    "zh-Hant": "獲取QR 碼",
+    "en": "Get QR code"
+  },
+  "设置备份密码": {
+    "zh-Hant": "設定備份密碼",
+    "en": "Set backup password"
+  },
+  "设置完成，开始使用吧": {
+    "zh-Hant": "設定完成，開始使用吧",
+    "en": "All set. Let's get started"
+  },
+  "语言": {
+    "zh-Hant": "語言",
+    "en": "Language"
+  },
+  "请使用微信扫码并确认登录": {
+    "zh-Hant": "請使用微信掃碼並確認登入",
+    "en": "Scan with WeChat and confirm the login"
+  },
+  "请先在地图上选择位置": {
+    "zh-Hant": "請先在地圖上選擇位置",
+    "en": "Pick a location on the map first"
+  },
+  "请先扫码登录，或手动填入 Cookie": {
+    "zh-Hant": "請先掃碼登入，或手動填入 Cookie",
+    "en": "Log in with QR first, or enter the cookie manually"
+  },
+  "请先选择一个任务": {
+    "zh-Hant": "請先選擇一個任務",
+    "en": "Select a task first"
+  },
+  "请求被服务器拒绝（HTTP {0}），可能是登录失效": {
+    "zh-Hant": "請求被伺服器拒絕（HTTP {0}），可能是登入失效",
+    "en": "Request rejected by the server (HTTP {0}). Your login may have expired"
+  },
+  "请输入密码": {
+    "zh-Hant": "請輸入密碼",
+    "en": "Enter the password"
+  },
+  "请重新获取二维码": {
+    "zh-Hant": "請重新獲取QR 碼",
+    "en": "Get a new QR code"
+  },
+  "跟随壁纸取色": {
+    "zh-Hant": "跟隨桌布取色",
+    "en": "Wallpaper colors"
+  },
+  "跟随系统": {
+    "zh-Hant": "跟隨系統",
+    "en": "System"
+  },
+  "跳过": {
+    "zh-Hant": "跳過",
+    "en": "Skip"
+  },
+  "输入备份密码": {
+    "zh-Hant": "輸入備份密碼",
+    "en": "Enter backup password"
+  },
+  "还没有任务。扫码登录后会自动填入账号信息，选好位置和时间即可保存。": {
+    "zh-Hant": "還沒有任務。掃碼登入後會自動填入帳號資訊，選好位置和時間即可儲存。",
+    "en": "No tasks yet. Log in with QR to fill in your account, then pick a location and times to save."
+  },
+  "这一天没有执行记录": {
+    "zh-Hant": "這一天沒有執行記錄",
+    "en": "No runs on this day"
+  },
+  "选择开始日期": {
+    "zh-Hant": "選擇開始日期",
+    "en": "Choose start date"
+  },
+  "选择结束日期": {
+    "zh-Hant": "選擇結束日期",
+    "en": "Choose end date"
+  },
+  "选用": {
+    "zh-Hant": "選用",
+    "en": "Use"
+  },
+  "通知推送（可选）": {
+    "zh-Hant": "通知推送（可選）",
+    "en": "Push notifications (optional)"
+  },
+  "通知权限": {
+    "zh-Hant": "通知權限",
+    "en": "Notifications"
+  },
+  "部分失败": {
+    "zh-Hant": "部分失敗",
+    "en": "Partly failed"
+  },
+  "重排定时": {
+    "zh-Hant": "重排定時",
+    "en": "Reschedule"
+  },
+  "重新查看引导": {
+    "zh-Hant": "重新檢視引導",
+    "en": "View setup guide again"
+  },
+  "重新获取": {
+    "zh-Hant": "重新獲取",
+    "en": "Get new code"
+  },
+  "闹钟和提醒": {
+    "zh-Hant": "鬧鐘和提醒",
+    "en": "Alarms & reminders"
+  },
+  "隐私数据": {
+    "zh-Hant": "隱私資料",
+    "en": "Privacy"
+  },
+  "需要 Android 12 及以上": {
+    "zh-Hant": "需要 Android 12 及以上",
+    "en": "Requires Android 12 or later"
+  },
+  "需要定位权限才能收藏当前位置": {
+    "zh-Hant": "需要定位權限才能收藏目前位置",
+    "en": "Location permission is needed to save your current location"
+  },
+  "颜色格式应为 #RRGGBB 或 #AARRGGBB": {
+    "zh-Hant": "顏色格式應為 #RRGGBB 或 #AARRGGBB",
+    "en": "Color must be #RRGGBB or #AARRGGBB"
+  },
+  "iOS 依靠通知提醒你签到：到点推送通知，点按即可签到；后台补签后也会告诉你结果。": {
+    "zh-Hant": "iOS 依靠通知提醒你簽到：到點推送通知，點按即可簽到；背景補簽後也會告訴你結果。",
+    "en": "iOS uses notifications to remind you: you'll get one at each run time and can tap it to sign in. Background catch-up runs also report their results."
+  },
+  "iOS 定时签到": {
+    "zh-Hant": "iOS 定時簽到",
+    "en": "iOS scheduled sign-in"
+  },
+  "上次签到结果": {
+    "zh-Hant": "上次簽到結果",
+    "en": "Last sign-in result"
+  },
+  "任务已保存，并已安排下一次签到提醒": {
+    "zh-Hant": "任務已儲存，並已安排下一次簽到提醒",
+    "en": "Task saved and next sign-in reminder scheduled"
+  },
+  "低电量模式": {
+    "zh-Hant": "低電量模式",
+    "en": "Low Power Mode"
+  },
+  "低电量模式会暂停后台刷新，请留意": {
+    "zh-Hant": "低電量模式會暫停背景重新整理，請留意",
+    "en": "Low Power Mode pauses background refresh"
+  },
+  "允许": {
+    "zh-Hant": "允許",
+    "en": "Allow"
+  },
+  "关闭表示不限制": {
+    "zh-Hant": "關閉表示不限制",
+    "en": "Off means no limit"
+  },
+  "再次完成扫码登录、通知权限和后台刷新设置": {
+    "zh-Hant": "再次完成掃碼登入、通知權限和背景重新整理設定",
+    "en": "Go through QR login, notifications and background refresh again"
+  },
+  "删除任务「{0}」？": {
+    "zh-Hant": "刪除任務「{0}」？",
+    "en": "Delete task \"{0}\"?"
+  },
+  "到达执行时间时会推送通知，点击通知或通知上的「立即签到」即可执行；系统也会在后台刷新时自动补签，打开 App 时会补签 30 分钟内错过的任务。请允许通知权限并开启「后台 App 刷新」。": {
+    "zh-Hant": "到達執行時間時會推送通知，點按通知或通知上的「立即簽到」即可執行；系統也會在背景重新整理時自動補簽，開啟 App 時會補簽 30 分鐘內錯過的任務。請允許通知權限並開啟「背景 App 重新整理」。",
+    "en": "You'll get a notification at each run time; tap it or its \"Sign in now\" button to run. The system also catches up during background refresh, and opening the app runs anything missed in the last 30 minutes. Allow notifications and turn on Background App Refresh."
+  },
+  "可截图后在微信中长按识别，或用另一台设备的微信扫描": {
+    "zh-Hant": "可截圖後在微信中長按識別，或用另一台裝置的微信掃描",
+    "en": "Take a screenshot and long-press it in WeChat, or scan it with WeChat on another device"
+  },
+  "后台 App 刷新": {
+    "zh-Hant": "背景 App 重新整理",
+    "en": "Background App Refresh"
+  },
+  "已启用": {
+    "zh-Hant": "已啟用",
+    "en": "Enabled"
+  },
+  "已开启": {
+    "zh-Hant": "已開啟",
+    "en": "On"
+  },
+  "开启「后台 App 刷新」后，系统会在后台自动补签；打开 App 时也会补签 30 分钟内错过的任务。": {
+    "zh-Hant": "開啟「背景 App 重新整理」後，系統會在背景自動補簽；開啟 App 時也會補簽 30 分鐘內錯過的任務。",
+    "en": "With Background App Refresh on, the system catches up in the background. Opening the app also runs anything missed in the last 30 minutes."
+  },
+  "成功 {0}/{1}": {
+    "zh-Hant": "成功 {0}/{1}",
+    "en": "{0}/{1} succeeded"
+  },
+  "显示上一次执行的结果和下次执行时间": {
+    "zh-Hant": "顯示上一次執行的結果和下次執行時間",
+    "en": "Shows the last result and the next run time"
+  },
+  "更多操作": {
+    "zh-Hant": "更多操作",
+    "en": "More actions"
+  },
+  "未开启，请在系统设置中打开": {
+    "zh-Hant": "未開啟，請在系統設定中開啟",
+    "en": "Off. Turn it on in Settings"
+  },
+  "正在处理": {
+    "zh-Hant": "正在處理",
+    "en": "Working"
+  },
+  "正在补签 {0} 个到期任务...": {
+    "zh-Hant": "正在補簽 {0} 個到期任務...",
+    "en": "Catching up {0} due tasks..."
+  },
+  "点击通知或「立即签到」执行本次签到": {
+    "zh-Hant": "點按通知或「立即簽到」執行本次簽到",
+    "en": "Tap the notification or \"Sign in now\" to run this sign-in"
+  },
+  "点按移除该时间": {
+    "zh-Hant": "點按移除該時間",
+    "en": "Tap to remove this time"
+  },
+  "状态": {
+    "zh-Hant": "狀態",
+    "en": "Status"
+  },
+  "登录、配置、签到、日志和定时提醒均在本机完成": {
+    "zh-Hant": "登入、配置、簽到、日誌和定時提醒均在本機完成",
+    "en": "Login, setup, sign-in, logs and reminders all happen on this device"
+  },
+  "签到时间到：{0}": {
+    "zh-Hant": "簽到時間到：{0}",
+    "en": "Time to sign in: {0}"
+  },
+  "签到未完成": {
+    "zh-Hant": "簽到未完成",
+    "en": "Sign-in not completed"
+  },
+  "签到点": {
+    "zh-Hant": "簽到點",
+    "en": "Sign-in point"
+  },
+  "精度": {
+    "zh-Hant": "精度",
+    "en": "Accuracy"
+  },
+  "自定义": {
+    "zh-Hant": "自訂",
+    "en": "Custom"
+  },
+  "该任务的定时提醒也会一并取消。": {
+    "zh-Hant": "該任務的定時提醒也會一併取消。",
+    "en": "Its scheduled reminders will be cancelled too."
+  },
+  "还没有执行记录": {
+    "zh-Hant": "還沒有執行記錄",
+    "en": "No runs yet"
+  }
+}

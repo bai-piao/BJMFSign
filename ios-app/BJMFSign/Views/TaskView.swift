@@ -18,20 +18,20 @@ private struct TaskListCard: View {
     var body: some View {
         GlassCard {
             HStack {
-                Text("本机任务")
+                Text(tr("本机任务"))
                     .font(.title3.weight(.semibold))
                 Spacer()
                 Button {
                     viewModel.startNewTask()
                 } label: {
-                    Label("新建", systemImage: "plus")
+                    Label(tr("新建"), systemImage: "plus")
                 }
                 .buttonStyle(.glass)
                 .disabled(viewModel.isBusy)
             }
 
             if viewModel.tasks.isEmpty {
-                Text("还没有任务。扫码登录后会自动填入账号信息，选好位置和时间即可保存。")
+                Text(tr("还没有任务。扫码登录后会自动填入账号信息，选好位置和时间即可保存。"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
@@ -67,17 +67,19 @@ private struct TaskRow: View {
                 Circle()
                     .fill(task.enabled ? StatusStyle.enabledColor : Color.secondary.opacity(0.5))
                     .frame(width: 9, height: 9)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(task.name)
                         .font(.body.weight(.semibold))
                         .lineLimit(1)
-                    Text("班级 \(task.classId)")
+                    Text(tr("班级 {0}", task.classId))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Toggle("启用", isOn: Binding(get: { task.enabled }, set: { _ in onToggle() }))
+                Toggle(tr("启用任务"), isOn: Binding(get: { task.enabled }, set: { _ in onToggle() }))
                     .labelsHidden()
+                    .accessibilityValue(task.enabled ? tr("已启用") : tr("已停用"))
             }
 
             Label(
@@ -99,8 +101,8 @@ private struct TaskRow: View {
 
             HStack(spacing: 8) {
                 Spacer()
-                Button("编辑", action: onSelect)
-                Button("立即签到", systemImage: "location.fill", action: onRunNow)
+                Button(tr("编辑"), action: onSelect)
+                Button(tr("立即签到"), systemImage: "location.fill", action: onRunNow)
                     .disabled(isBusy)
             }
             .buttonStyle(.glass)
@@ -119,9 +121,9 @@ private struct TaskRow: View {
     }
 
     private var locationText: String {
-        var text = "位置 \(task.lng), \(task.lat) · 精度 \(task.acc)m"
+        var text = tr("位置 {0}, {1} · 精度 {2}m", task.lng, task.lat, task.acc)
         if let range = NextRunText.dateRange(start: task.dateStart, end: task.dateEnd) {
-            text += "\n生效 \(range)"
+            text += "\n" + tr("生效 {0}", range)
         }
         return text
     }
@@ -148,7 +150,7 @@ struct TimeChip: View {
         .contentShape(.capsule)
         .onTapGesture { onRemove?() }
         .accessibilityAddTraits(onRemove == nil ? [] : .isButton)
-        .accessibilityHint(onRemove == nil ? "" : "移除该时间")
+        .accessibilityHint(onRemove == nil ? "" : tr("点按移除该时间"))
     }
 }
 
@@ -165,22 +167,22 @@ private struct TaskEditorCard: View {
     private var times: [String] { BjmfViewModel.normalizeTimes(viewModel.taskForm.timesText) }
 
     var body: some View {
-        GlassCard(title: editing ? "编辑任务" : "新建任务") {
-            SectionHeader("基本信息")
+        GlassCard(title: editing ? tr("编辑任务") : tr("新建任务")) {
+            SectionHeader(tr("基本信息"))
             HStack(spacing: 10) {
-                LabeledField(label: "姓名", text: $viewModel.taskForm.name)
-                LabeledField(label: "班级 ID", text: $viewModel.taskForm.classId, keyboard: .numberPad)
+                LabeledField(label: tr("姓名"), text: $viewModel.taskForm.name)
+                LabeledField(label: tr("班级 ID"), text: $viewModel.taskForm.classId, keyboard: .numberPad)
             }
 
             SectionSpacer()
             MapCoordinatePicker(viewModel: viewModel)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("定位精度（米）")
+                Text(tr("定位精度（米）"))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.secondary)
                 HStack(spacing: 6) {
-                    TextField("精度", text: $viewModel.taskForm.acc)
+                    TextField(tr("精度"), text: $viewModel.taskForm.acc)
                         .keyboardType(.numberPad)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 10)
@@ -200,9 +202,9 @@ private struct TaskEditorCard: View {
             .padding(.top, 4)
 
             SectionSpacer()
-            SectionHeader("执行时间")
+            SectionHeader(tr("执行时间"))
             if times.isEmpty {
-                Text("尚未添加执行时间")
+                Text(tr("尚未添加执行时间"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
@@ -215,20 +217,20 @@ private struct TaskEditorCard: View {
                 }
             }
             HStack {
-                Text("点按时间可移除")
+                Text(tr("点按时间可移除"))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Button("添加时间", systemImage: "plus") { showTimePicker = true }
+                Button(tr("添加时间"), systemImage: "plus") { showTimePicker = true }
                     .buttonStyle(.glass)
                     .controlSize(.small)
             }
 
             SectionSpacer()
-            SectionHeader("生效日期")
-            OptionalDateRow(label: "开始日期", text: $viewModel.taskForm.dateStart)
-            OptionalDateRow(label: "结束日期", text: $viewModel.taskForm.dateEnd)
-            Text("关闭表示不限制")
+            SectionHeader(tr("生效日期"))
+            OptionalDateRow(label: tr("开始日期"), text: $viewModel.taskForm.dateStart)
+            OptionalDateRow(label: tr("结束日期"), text: $viewModel.taskForm.dateEnd)
+            Text(tr("关闭表示不限制"))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
@@ -245,7 +247,7 @@ private struct TaskEditorCard: View {
             .padding(.top, 6)
 
             SectionSpacer()
-            SectionHeader("登录凭证")
+            SectionHeader(tr("登录凭证"))
             PreferenceRow(
                 title: "Cookie",
                 summary: Self.cookieSummary(viewModel.taskForm.cookie),
@@ -256,13 +258,13 @@ private struct TaskEditorCard: View {
                     .foregroundStyle(.secondary)
             }
             if showCookie || viewModel.taskForm.cookie.isBlankText {
-                LabeledField(label: "Cookie（扫码登录后自动填入）", text: $viewModel.taskForm.cookie, axis: .vertical)
+                LabeledField(label: tr("Cookie（扫码登录后自动填入）"), text: $viewModel.taskForm.cookie, axis: .vertical)
             }
 
             SectionSpacer()
-            SectionHeader("通知推送（可选）")
-            LabeledField(label: "Server酱 Key（微信）", text: $viewModel.taskForm.wxKey)
-            LabeledField(label: "Qmsg酱 Key（QQ）", text: $viewModel.taskForm.qqKey)
+            SectionHeader(tr("通知推送（可选）"))
+            LabeledField(label: tr("Server酱 Key（微信）"), text: $viewModel.taskForm.wxKey)
+            LabeledField(label: tr("Qmsg酱 Key（QQ）"), text: $viewModel.taskForm.qqKey)
 
             GlassEffectContainer(spacing: 10) {
                 VStack(spacing: 10) {
@@ -270,12 +272,12 @@ private struct TaskEditorCard: View {
                         Button {
                             viewModel.saveTask()
                         } label: {
-                            Label(editing ? "保存修改" : "保存任务", systemImage: "checkmark")
+                            Label(editing ? tr("保存修改") : tr("保存任务"), systemImage: "checkmark")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.glassProminent)
 
-                        Button("用扫码账号") {
+                        Button(tr("用扫码账号")) {
                             viewModel.newTaskFromAccount()
                         }
                         .buttonStyle(.glass)
@@ -285,12 +287,12 @@ private struct TaskEditorCard: View {
                             Button {
                                 viewModel.runSelectedNow()
                             } label: {
-                                Label("立即签到", systemImage: "location.fill")
+                                Label(tr("立即签到"), systemImage: "location.fill")
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.glass)
 
-                            Button("删除任务", role: .destructive) {
+                            Button(tr("删除任务"), role: .destructive) {
                                 confirmDelete = true
                             }
                             .buttonStyle(.glass)
@@ -305,27 +307,27 @@ private struct TaskEditorCard: View {
         .animation(.smooth, value: times)
         .sheet(isPresented: $showTimePicker) {
             NavigationStack {
-                DatePicker("执行时间", selection: $newTime, displayedComponents: .hourAndMinute)
+                DatePicker(tr("执行时间"), selection: $newTime, displayedComponents: .hourAndMinute)
                     .datePickerStyle(.wheel)
                     .labelsHidden()
-                    .environment(\.locale, Locale(identifier: "zh_CN"))
-                    .navigationTitle("添加执行时间")
+                    .environment(\.locale, I18n.locale)
+                    .navigationTitle(tr("添加执行时间"))
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("取消", role: .cancel) { showTimePicker = false }
+                            Button(tr("取消"), role: .cancel) { showTimePicker = false }
                         }
                         ToolbarItem(placement: .confirmationAction) {
-                            Button("添加", systemImage: "checkmark") { addTime() }
+                            Button(tr("添加"), systemImage: "checkmark") { addTime() }
                         }
                     }
             }
             .presentationDetents([.height(320)])
         }
-        .confirmationDialog("删除任务「\(viewModel.taskForm.name)」？", isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button("删除任务", role: .destructive) { viewModel.deleteSelectedTask() }
+        .confirmationDialog(tr("删除任务「{0}」？", viewModel.taskForm.name), isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button(tr("删除任务"), role: .destructive) { viewModel.deleteSelectedTask() }
         } message: {
-            Text("该任务的定时提醒也会一并取消。")
+            Text(tr("该任务的定时提醒也会一并取消。"))
         }
     }
 
@@ -339,9 +341,9 @@ private struct TaskEditorCard: View {
 
     private static func cookieSummary(_ cookie: String) -> String {
         let value = cookie.trimmed
-        if value.isEmpty { return "未填写" }
+        if value.isEmpty { return tr("未填写") }
         let head = String(value.prefix(18))
-        return value.count > 18 ? "\(head)…（共 \(value.count) 字符）" : head
+        return value.count > 18 ? tr("{0}…（共 {1} 字符）", head, value.count) : head
     }
 }
 
@@ -368,9 +370,9 @@ private struct OptionalDateRow: View {
                     displayedComponents: .date
                 )
                 .labelsHidden()
-                .environment(\.locale, Locale(identifier: "zh_CN"))
+                .environment(\.locale, I18n.locale)
             } else {
-                Text("不限")
+                Text(tr("不限"))
                     .foregroundStyle(.secondary)
             }
         }
@@ -390,7 +392,7 @@ private struct MapCoordinatePicker: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader("签到位置")
+            SectionHeader(tr("签到位置"))
             Text(selectedText)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -399,7 +401,7 @@ private struct MapCoordinatePicker: View {
             MapReader { proxy in
                 Map(position: $position) {
                     if let selected {
-                        Marker("签到点", systemImage: "mappin", coordinate: selected)
+                        Marker(tr("签到点"), systemImage: "mappin", coordinate: selected)
                             .tint(.red)
                     }
                     UserAnnotation()
@@ -417,6 +419,7 @@ private struct MapCoordinatePicker: View {
             }
             .frame(height: 280)
             .clipShape(.rect(cornerRadius: 20))
+            .accessibilityLabel(tr("地图选点，点按地图设置签到位置"))
             .overlay(alignment: .bottomTrailing) {
                 Button {
                     viewModel.useCurrentLocationAndFavorite()
@@ -428,7 +431,7 @@ private struct MapCoordinatePicker: View {
                 .buttonStyle(.plain)
                 .glassEffect(.regular.interactive(), in: .circle)
                 .padding(10)
-                .accessibilityLabel("定位并收藏")
+                .accessibilityLabel(tr("定位并收藏"))
             }
             .onAppear { recenter(zoomIn: selected != nil) }
             .onChange(of: viewModel.taskForm.coord) { _, _ in recenter(zoomIn: true) }
@@ -438,7 +441,7 @@ private struct MapCoordinatePicker: View {
                     Button {
                         viewModel.useCurrentLocationAndFavorite()
                     } label: {
-                        Label("定位并收藏", systemImage: "location.circle")
+                        Label(tr("定位并收藏"), systemImage: "location.circle")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.glassProminent)
@@ -446,7 +449,7 @@ private struct MapCoordinatePicker: View {
                     Button {
                         viewModel.favoriteSelectedLocation()
                     } label: {
-                        Label("收藏选点", systemImage: "star")
+                        Label(tr("收藏选点"), systemImage: "star")
                     }
                     .buttonStyle(.glass)
                     .disabled(selected == nil)
@@ -455,9 +458,9 @@ private struct MapCoordinatePicker: View {
             }
 
             if viewModel.favoriteLocations.isEmpty {
-                PreferenceRow(title: "位置收藏", summary: "可收藏当前位置或地图选点")
+                PreferenceRow(title: tr("位置收藏"), summary: tr("可收藏当前位置或地图选点"))
             } else {
-                Text("位置收藏")
+                Text(tr("位置收藏"))
                     .font(.subheadline.weight(.semibold))
                     .padding(.top, 4)
                 ForEach(Array(viewModel.favoriteLocations.enumerated()), id: \.element.id) { index, location in
@@ -468,12 +471,13 @@ private struct MapCoordinatePicker: View {
                         onTap: { viewModel.useFavoriteLocation(location) }
                     ) {
                         Menu {
-                            Button("选用", systemImage: "checkmark") { viewModel.useFavoriteLocation(location) }
-                            Button("删除", systemImage: "trash", role: .destructive) { viewModel.deleteFavoriteLocation(location) }
+                            Button(tr("选用"), systemImage: "checkmark") { viewModel.useFavoriteLocation(location) }
+                            Button(tr("删除"), systemImage: "trash", role: .destructive) { viewModel.deleteFavoriteLocation(location) }
                         } label: {
                             Image(systemName: "ellipsis.circle")
                                 .font(.title3)
                         }
+                        .accessibilityLabel(tr("更多操作"))
                     }
                     if index != viewModel.favoriteLocations.count - 1 {
                         RowDivider()
@@ -484,8 +488,8 @@ private struct MapCoordinatePicker: View {
     }
 
     private var selectedText: String {
-        guard let selected else { return "点击地图选择签到点" }
-        return "已选择：经度 \(CoordinateUtils.coordText(selected.longitude))，纬度 \(CoordinateUtils.coordText(selected.latitude))"
+        guard let selected else { return tr("点击地图选择签到点") }
+        return tr("已选择：经度 {0}，纬度 {1}", CoordinateUtils.coordText(selected.longitude), CoordinateUtils.coordText(selected.latitude))
     }
 
     private func recenter(zoomIn: Bool) {

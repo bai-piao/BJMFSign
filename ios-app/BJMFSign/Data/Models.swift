@@ -81,16 +81,17 @@ enum SignStatus {
 
     static func label(_ status: String) -> String {
         switch status {
-        case "success": return "成功"
-        case "already_signed": return "已签到"
-        case "not_started": return "未开始"
-        case "no_sign_in": return "无签到"
-        case "skip": return "跳过"
-        case "error": return "失败"
-        default: return status.isEmpty ? "未知" : status
+        case "success": return tr("成功")
+        case "already_signed": return tr("已签到")
+        case "not_started": return tr("未开始")
+        case "no_sign_in": return tr("无签到")
+        case "skip": return tr("跳过")
+        case "error": return tr("失败")
+        default: return status.isEmpty ? tr("未知") : status
         }
     }
 
+    /// 写入日志与推送正文的状态说明（日志内容保持中文，与 Android 一致）。
     static func description(_ status: String) -> String {
         switch status {
         case "success": return "签到成功"

@@ -1,6 +1,19 @@
 package com.bjmf.sign.android.ui
 
 import android.Manifest
+import android.net.Uri
+import android.os.Build
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import com.bjmf.sign.android.data.I18n
+import com.bjmf.sign.android.data.SIGN_ZONE
+import com.bjmf.sign.android.ui.glass.GlassSwitch
+import java.time.LocalDate
+import top.yukonga.miuix.kmp.window.WindowDialog
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
@@ -48,6 +61,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bjmf.sign.android.BjmfScreen
+import com.bjmf.sign.android.data.tr
 import com.bjmf.sign.android.BjmfUiState
 import com.bjmf.sign.android.BjmfViewModel
 import com.bjmf.sign.android.data.BjmfStore
@@ -103,8 +117,19 @@ fun BjmfApp(viewModel: BjmfViewModel = viewModel()) {
     }
 
     val dark = isAppInDarkTheme(state.themeMode)
-    BjmfMiuixTheme(keyColor = Color(state.accentColor), themeMode = state.themeMode) {
-        GlassTheme(accent = Color(state.accentColor), dark = dark) {
+    val context = LocalContext.current
+    // 跟随壁纸取色（Monet）：Android 12+ 使用系统动态强调色。
+    val accent = if (state.dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        Color(context.getColor(android.R.color.system_accent1_500))
+    } else {
+        Color(state.accentColor)
+    }
+    BjmfMiuixTheme(keyColor = accent, themeMode = state.themeMode) {
+        GlassTheme(accent = accent, dark = dark) {
+            if (state.showOnboarding) {
+                OnboardingScreen(state, viewModel)
+                return@GlassTheme
+            }
             val hazeState = rememberHazeState()
             Box(modifier = Modifier.fillMaxSize()) {
                 Box(
@@ -143,7 +168,7 @@ fun BjmfApp(viewModel: BjmfViewModel = viewModel()) {
                 GlassTabBar(
                     items = screens.map { screen ->
                         GlassTabItem(
-                            title = screen.title,
+                            title = tr(screen.title),
                             icon = screen.icon(),
                             badge = when (screen) {
                                 BjmfScreen.Task -> state.tasks.count { it.enabled }
@@ -170,10 +195,10 @@ private fun BjmfScreen.icon(): GlassIcon = when (this) {
 }
 
 private fun BjmfScreen.largeTitle(): String = when (this) {
-    BjmfScreen.Login -> "扫码登录"
-    BjmfScreen.Task -> "签到任务"
-    BjmfScreen.Logs -> "执行日志"
-    BjmfScreen.Settings -> "本机管理"
+    BjmfScreen.Login -> tr("扫码登录")
+    BjmfScreen.Task -> tr("签到任务")
+    BjmfScreen.Logs -> tr("执行日志")
+    BjmfScreen.Settings -> tr("本机管理")
 }
 
 /** 大标题 + 副标题（对应 iOS 的 navigationTitle / navigationSubtitle）。 */
@@ -191,7 +216,7 @@ private fun PageHeader(screen: BjmfScreen, busy: Boolean) {
                 fontWeight = FontWeight.Bold,
                 color = palette.label,
             )
-            Text(text = "班级魔方签到", fontSize = 15.sp, color = palette.secondaryLabel)
+            Text(text = tr("班级魔方签到"), fontSize = 15.sp, color = palette.secondaryLabel)
         }
         if (busy) GlassSpinner()
     }
@@ -214,13 +239,13 @@ private fun StatusCard(state: BjmfUiState) {
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "本机任务 $enabledCount/${state.tasks.size}",
+                    text = tr("本机任务 {0}/{1}", enabledCount, state.tasks.size),
                     color = Color.White,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = "登录、配置、签到、日志和定时任务均在本机完成",
+                    text = tr("登录、配置、签到、日志和定时任务均在本机完成"),
                     color = Color.White.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     maxLines = 2,
@@ -239,7 +264,7 @@ private fun StatusCard(state: BjmfUiState) {
 @Composable
 private fun LoginScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
     val palette = Glass.palette
-    GlassCard(title = "微信扫码添加账号", modifier = Modifier.animateContentSize()) {
+    GlassCard(title = tr("微信扫码添加账号"), modifier = Modifier.animateContentSize()) {
         Text(text = state.qrStatusText, color = palette.secondaryLabel, fontSize = 15.sp)
 
         state.qrImageDataUrl?.let { dataUrl ->
@@ -253,7 +278,7 @@ private fun LoginScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
                 )
             }
             Text(
-                text = "可截图后在微信「扫一扫 → 相册」中识别，或用另一台设备的微信扫描",
+                text = tr("可截图后在微信「扫一扫 → 相册」中识别，或用另一台设备的微信扫描"),
                 color = palette.secondaryLabel,
                 fontSize = 13.sp,
             )
@@ -261,7 +286,7 @@ private fun LoginScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
 
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             GlassButton(
-                text = if (state.qrImageDataUrl == null) "获取二维码" else "重新获取",
+                text = if (state.qrImageDataUrl == null) tr("获取二维码") else tr("重新获取"),
                 onClick = viewModel::createQrSession,
                 style = GlassButtonStyle.Prominent,
                 size = GlassButtonSize.Large,
@@ -270,7 +295,7 @@ private fun LoginScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
                 modifier = Modifier.weight(1f),
             )
             GlassButton(
-                text = "清除",
+                text = tr("清除"),
                 onClick = viewModel::clearQrSession,
                 style = GlassButtonStyle.Destructive,
                 size = GlassButtonSize.Large,
@@ -284,21 +309,21 @@ private fun LoginScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
 
 @Composable
 private fun UserCard(user: UserInfo) {
-    GlassCard(title = "当前扫码账号") {
+    GlassCard(title = tr("当前扫码账号")) {
         Column {
-            PreferenceRow(title = "姓名", value = user.name)
+            PreferenceRow(title = tr("姓名"), value = user.name)
             ListDivider()
-            PreferenceRow(title = "班级", value = user.className)
+            PreferenceRow(title = tr("班级"), value = user.className)
             ListDivider()
-            PreferenceRow(title = "班级 ID", value = user.classId)
+            PreferenceRow(title = tr("班级 ID"), value = user.classId)
             ListDivider()
-            PreferenceRow(title = "班级码", value = user.classCode)
+            PreferenceRow(title = tr("班级码"), value = user.classCode)
         }
     }
 }
 
 @Composable
-private fun QrCodeImage(dataUrl: String, modifier: Modifier = Modifier) {
+internal fun QrCodeImage(dataUrl: String, modifier: Modifier = Modifier) {
     val bitmap = remember(dataUrl) { dataUrl.toImageBitmapOrNull() }
     Box(
         modifier = modifier
@@ -308,11 +333,11 @@ private fun QrCodeImage(dataUrl: String, modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center,
     ) {
         if (bitmap == null) {
-            Text("二维码解析失败", color = Color.Black)
+            Text(tr("二维码解析失败"), color = Color.Black)
         } else {
             Image(
                 bitmap = bitmap,
-                contentDescription = "微信登录二维码",
+                contentDescription = tr("微信登录二维码"),
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -441,9 +466,9 @@ internal fun MapCoordinatePicker(
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        SectionHeader("签到位置")
+        SectionHeader(tr("签到位置"))
         Text(
-            text = selected?.let { "已选择：经度 ${it.second.toCoordText()}，纬度 ${it.first.toCoordText()}" } ?: "点击地图选择签到点",
+            text = selected?.let { tr("已选择：经度 {0}，纬度 {1}", it.second.toCoordText(), it.first.toCoordText()) } ?: tr("点击地图选择签到点"),
             color = palette.secondaryLabel,
             fontSize = 14.sp,
             maxLines = 2,
@@ -458,6 +483,7 @@ internal fun MapCoordinatePicker(
                 .background(palette.fill),
         ) {
             NativeMapPicker(
+                contentDescription = tr("地图选点，点按地图设置签到位置"),
                 initialLat = initial.first,
                 initialLng = initial.second,
                 hasSelection = selected != null,
@@ -466,6 +492,7 @@ internal fun MapCoordinatePicker(
             GlassIconButton(
                 icon = GlassIcon.Location,
                 onClick = requestCurrentLocation,
+                contentDescription = tr("定位并收藏"),
                 enabled = !isBusy,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -474,7 +501,7 @@ internal fun MapCoordinatePicker(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             GlassButton(
-                text = "定位并收藏",
+                text = tr("定位并收藏"),
                 onClick = requestCurrentLocation,
                 style = GlassButtonStyle.Prominent,
                 icon = GlassIcon.Location,
@@ -482,7 +509,7 @@ internal fun MapCoordinatePicker(
                 modifier = Modifier.weight(1f),
             )
             GlassButton(
-                text = "收藏选点",
+                text = tr("收藏选点"),
                 onClick = onFavoriteSelectedLocation,
                 icon = GlassIcon.Star,
                 enabled = !isBusy && selected != null,
@@ -490,9 +517,9 @@ internal fun MapCoordinatePicker(
         }
 
         if (favoriteLocations.isEmpty()) {
-            PreferenceRow(title = "位置收藏", summary = "可收藏当前位置或地图选点")
+            PreferenceRow(title = tr("位置收藏"), summary = tr("可收藏当前位置或地图选点"))
         } else {
-            Text(text = "位置收藏", color = palette.label, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Text(text = tr("位置收藏"), color = palette.label, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
             Column {
                 favoriteLocations.forEachIndexed { index, location ->
                     PreferenceRow(
@@ -503,12 +530,12 @@ internal fun MapCoordinatePicker(
                         action = {
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 GlassButton(
-                                    text = "选用",
+                                    text = tr("选用"),
                                     onClick = { onUseFavoriteLocation(location) },
                                     size = GlassButtonSize.Small,
                                 )
                                 GlassButton(
-                                    text = "删除",
+                                    text = tr("删除"),
                                     onClick = { onDeleteFavoriteLocation(location) },
                                     style = GlassButtonStyle.Destructive,
                                     size = GlassButtonSize.Small,
@@ -529,17 +556,17 @@ internal fun MapCoordinatePicker(
 
 @Composable
 private fun ManageScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
-    GlassCard(title = "本机管理") {
+    GlassCard(title = tr("本机管理")) {
         Column {
-            PreferenceRow(title = "任务总数", value = state.tasks.size.toString())
+            PreferenceRow(title = tr("任务总数"), value = state.tasks.size.toString())
             ListDivider()
-            PreferenceRow(title = "启用任务", value = state.tasks.count { it.enabled }.toString())
+            PreferenceRow(title = tr("启用任务"), value = state.tasks.count { it.enabled }.toString())
             ListDivider()
-            PreferenceRow(title = "日志数量", value = state.logs.size.toString())
+            PreferenceRow(title = tr("日志数量"), value = state.logs.size.toString())
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             GlassButton(
-                text = "执行全部",
+                text = tr("执行全部"),
                 onClick = viewModel::runAllEnabledNow,
                 style = GlassButtonStyle.Prominent,
                 size = GlassButtonSize.Large,
@@ -548,7 +575,7 @@ private fun ManageScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
                 modifier = Modifier.weight(1f),
             )
             GlassButton(
-                text = "重排定时",
+                text = tr("重排定时"),
                 onClick = viewModel::rescheduleAll,
                 size = GlassButtonSize.Large,
                 icon = GlassIcon.Refresh,
@@ -559,25 +586,41 @@ private fun ManageScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
 
     AppearanceSection(themeMode = state.themeMode, onSelect = viewModel::setThemeMode)
 
+    LanguageSection(language = state.language, onSelect = viewModel::setLanguage)
+
     ThemeColorSection(
         accentColor = state.accentColor,
         accentColorText = state.accentColorText,
+        dynamicColor = state.dynamicColor,
+        onDynamicColorChange = viewModel::setDynamicColor,
         onAccentTextChange = viewModel::updateAccentColorText,
         onApplyAccentColor = viewModel::applyAccentColor,
         onSelectAccentColor = viewModel::selectAccentColor,
     )
 
-    GlassCard(title = "定时说明") {
+    BackupSection(isBusy = state.isBusy, viewModel = viewModel)
+
+    GlassCard(title = tr("使用引导")) {
         PreferenceRow(
-            title = "Android 定时签到",
-            summary = "使用系统闹钟在设定时间后台自动执行。Android 12+ 请允许本 App 的「闹钟和提醒」权限，并关闭电池优化，以保证准时执行。",
+            title = tr("重新查看引导"),
+            summary = tr("再次完成扫码登录、通知权限和电池优化设置"),
+            action = {
+                GlassButton(text = tr("打开"), onClick = viewModel::reopenOnboarding, size = GlassButtonSize.Small)
+            },
         )
     }
 
-    GlassCard(title = "隐私数据") {
+    GlassCard(title = tr("定时说明")) {
         PreferenceRow(
-            title = "本机私有存储",
-            summary = "任务 Cookie、坐标和通知 Key 均保存在本机 App 私有存储中。卸载 App 会清除这些数据。",
+            title = tr("Android 定时签到"),
+            summary = tr("使用系统闹钟在设定时间后台自动执行。Android 12+ 请允许本 App 的「闹钟和提醒」权限，并关闭电池优化，以保证准时执行。"),
+        )
+    }
+
+    GlassCard(title = tr("隐私数据")) {
+        PreferenceRow(
+            title = tr("本机私有存储"),
+            summary = tr("任务 Cookie、坐标和通知 Key 均保存在本机 App 私有存储中。卸载 App 会清除这些数据。"),
         )
     }
 }
@@ -585,14 +628,14 @@ private fun ManageScreen(state: BjmfUiState, viewModel: BjmfViewModel) {
 @Composable
 private fun AppearanceSection(themeMode: String, onSelect: (String) -> Unit) {
     val modes = listOf(BjmfStore.THEME_SYSTEM, BjmfStore.THEME_LIGHT, BjmfStore.THEME_DARK)
-    GlassCard(title = "外观") {
+    GlassCard(title = tr("外观")) {
         Text(
-            text = "深色模式可跟随系统，或固定为浅色 / 深色",
+            text = tr("深色模式可跟随系统，或固定为浅色 / 深色"),
             color = Glass.palette.secondaryLabel,
             fontSize = 15.sp,
         )
         SegmentedControl(
-            options = listOf("跟随系统", "浅色", "深色"),
+            options = listOf("跟随系统", tr("浅色"), tr("深色")),
             selectedIndex = modes.indexOf(themeMode).coerceAtLeast(0),
             onSelect = { index -> onSelect(modes[index]) },
         )
@@ -608,26 +651,42 @@ private val PresetColors = listOf(
 private fun ThemeColorSection(
     accentColor: Long,
     accentColorText: String,
+    dynamicColor: Boolean,
+    onDynamicColorChange: (Boolean) -> Unit,
     onAccentTextChange: (String) -> Unit,
     onApplyAccentColor: () -> Unit,
     onSelectAccentColor: (Long) -> Unit,
 ) {
-    GlassCard(title = "界面取色") {
+    val dynamicSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    GlassCard(title = tr("界面取色")) {
         PreferenceRow(
-            title = "当前主题色",
-            summary = accentColor.toHexColorText(),
-            indicatorColor = Color(accentColor),
+            title = tr("跟随壁纸取色"),
+            summary = if (dynamicSupported) tr("使用系统 Monet 动态取色，主题色随壁纸变化") else tr("需要 Android 12 及以上"),
+            action = {
+                GlassSwitch(
+                    checked = dynamicColor && dynamicSupported,
+                    onCheckedChange = onDynamicColorChange,
+                    enabled = dynamicSupported,
+                    contentDescription = tr("跟随壁纸取色"),
+                )
+            },
+        )
+        ListDivider()
+        PreferenceRow(
+            title = tr("当前主题色"),
+            summary = if (dynamicColor && dynamicSupported) tr("正在跟随壁纸") else accentColor.toHexColorText(),
+            indicatorColor = Glass.accent,
         )
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             LabeledField(
-                label = "HEX 颜色",
+                label = tr("HEX 颜色"),
                 value = accentColorText,
                 onValueChange = onAccentTextChange,
                 placeholder = "#3482FF",
                 keyboardType = KeyboardType.Ascii,
                 modifier = Modifier.weight(1f),
             )
-            GlassButton(text = "应用", onClick = onApplyAccentColor)
+            GlassButton(text = tr("应用"), onClick = onApplyAccentColor)
         }
         PresetColors.chunked(4).forEach { rowColors ->
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -653,7 +712,11 @@ private fun ColorSwatch(color: Long, selected: Boolean, onClick: () -> Unit, mod
             .clip(shape)
             .background(Color(color))
             .border(1.dp, Color.White.copy(alpha = 0.5f), shape)
-            .clickable(onClick = onClick),
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics {
+                contentDescription = tr("主题色 {0}", color.toHexColorText())
+                this.selected = selected
+            },
         contentAlignment = Alignment.Center,
     ) {
         if (selected) {
@@ -663,3 +726,133 @@ private fun ColorSwatch(color: Long, selected: Boolean, onClick: () -> Unit, mod
 }
 
 // endregion
+
+@Composable
+private fun LanguageSection(language: String, onSelect: (String) -> Unit) {
+    val options = listOf(I18n.SYSTEM, I18n.ZH_HANS, I18n.ZH_HANT, I18n.EN)
+    GlassCard(title = tr("语言")) {
+        Text(
+            text = tr("界面语言，跟随系统时按系统语言显示"),
+            color = Glass.palette.secondaryLabel,
+            fontSize = 15.sp,
+        )
+        SegmentedControl(
+            options = listOf(tr("跟随系统"), "简体", "繁體", "English"),
+            selectedIndex = options.indexOf(language).coerceAtLeast(0),
+            onSelect = { index -> onSelect(options[index]) },
+        )
+    }
+}
+
+@Composable
+private fun BackupSection(isBusy: Boolean, viewModel: BjmfViewModel) {
+    var dialog by remember { mutableStateOf<String?>(null) }
+    var pendingExportPassword by remember { mutableStateOf<String?>(null) }
+    var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+        val password = pendingExportPassword
+        pendingExportPassword = null
+        if (uri != null && password != null) viewModel.exportBackup(uri, password)
+    }
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            pendingImportUri = uri
+            dialog = "import"
+        }
+    }
+
+    GlassCard(title = tr("备份与迁移")) {
+        Text(
+            text = tr("把任务、位置收藏和界面设置导出为加密文件，换手机时直接导入。Android 与 iOS 通用。"),
+            color = Glass.palette.secondaryLabel,
+            fontSize = 15.sp,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            GlassButton(
+                text = tr("导出备份"),
+                onClick = { dialog = "export" },
+                style = GlassButtonStyle.Prominent,
+                icon = GlassIcon.Upload,
+                enabled = !isBusy,
+                modifier = Modifier.weight(1f),
+            )
+            GlassButton(
+                text = tr("导入备份"),
+                onClick = { importLauncher.launch(arrayOf("*/*")) },
+                icon = GlassIcon.Download,
+                enabled = !isBusy,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+
+    PasswordDialog(
+        show = dialog == "export",
+        title = tr("设置备份密码"),
+        summary = tr("导入时需要输入此密码，请牢记。至少 6 位。"),
+        requireConfirm = true,
+        onDismiss = { dialog = null },
+        onConfirm = { password ->
+            dialog = null
+            pendingExportPassword = password
+            val date = LocalDate.now(SIGN_ZONE).toString().replace("-", "")
+            exportLauncher.launch("bjmfsign-backup-$date.bjmf")
+        },
+    )
+    PasswordDialog(
+        show = dialog == "import",
+        title = tr("输入备份密码"),
+        summary = tr("导入会替换本机现有的任务和位置收藏。"),
+        requireConfirm = false,
+        onDismiss = {
+            dialog = null
+            pendingImportUri = null
+        },
+        onConfirm = { password ->
+            dialog = null
+            pendingImportUri?.let { viewModel.importBackup(it, password) }
+            pendingImportUri = null
+        },
+    )
+}
+
+@Composable
+private fun PasswordDialog(
+    show: Boolean,
+    title: String,
+    summary: String,
+    requireConfirm: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit,
+) {
+    var password by remember(show) { mutableStateOf("") }
+    var confirm by remember(show) { mutableStateOf("") }
+    var error by remember(show) { mutableStateOf<String?>(null) }
+    WindowDialog(
+        show = show,
+        title = title,
+        summary = summary,
+        onDismissRequest = onDismiss,
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            LabeledField(label = tr("密码"), value = password, onValueChange = { password = it }, password = true)
+            if (requireConfirm) {
+                LabeledField(label = tr("再次输入密码"), value = confirm, onValueChange = { confirm = it }, password = true)
+            }
+            error?.let { Text(text = it, color = Glass.palette.red, fontSize = 14.sp) }
+            DialogButtons(
+                confirmText = tr("确定"),
+                onDismiss = onDismiss,
+                onConfirm = {
+                    error = when {
+                        requireConfirm && password.length < 6 -> tr("密码至少 6 位")
+                        requireConfirm && password != confirm -> tr("两次输入的密码不一致")
+                        password.isEmpty() -> tr("请输入密码")
+                        else -> null
+                    }
+                    if (error == null) onConfirm(password)
+                },
+            )
+        }
+    }
+}

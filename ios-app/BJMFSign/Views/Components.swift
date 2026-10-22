@@ -247,21 +247,21 @@ enum NextRunText {
     }
 
     static func label(times: [String], dateStart: String?, dateEnd: String?, enabled: Bool) -> String {
-        if !enabled { return "已停用" }
-        if times.isEmpty { return "未设置执行时间" }
+        if !enabled { return tr("已停用") }
+        if times.isEmpty { return tr("未设置执行时间") }
         guard let next = BjmfScheduler.nextRun(times: times, dateStart: dateStart, dateEnd: dateEnd) else {
-            return "已过生效日期，不再执行"
+            return tr("已过生效日期，不再执行")
         }
         let time = formatter("HH:mm").string(from: next)
         let day: String
         if calendar.isDateInToday(next) {
-            day = "今天 \(time)"
+            day = tr("今天 {0}", time)
         } else if calendar.isDateInTomorrow(next) {
-            day = "明天 \(time)"
+            day = tr("明天 {0}", time)
         } else {
             day = formatter("MM-dd HH:mm").string(from: next)
         }
-        return "下次执行：\(day)"
+        return tr("下次执行：{0}", day)
     }
 
     static func shortTime(_ time: String) -> String {
@@ -273,9 +273,9 @@ enum NextRunText {
         let e = end?.trimmed.nilIfEmpty
         switch (s, e) {
         case (nil, nil): return nil
-        case let (s?, e?): return "\(s) 至 \(e)"
-        case let (s?, nil): return "\(s) 起"
-        case let (nil, e?): return "至 \(e)"
+        case let (s?, e?): return tr("{0} 至 {1}", s, e)
+        case let (s?, nil): return tr("{0} 起", s)
+        case let (nil, e?): return tr("至 {0}", e)
         }
     }
 
@@ -288,9 +288,13 @@ enum NextRunText {
     }
 
     static func dayLabel(_ date: Date) -> String {
-        if calendar.isDateInToday(date) { return "今天" }
-        if calendar.isDateInYesterday(date) { return "昨天" }
-        return formatter("M月d日 EEEE").string(from: date)
+        if calendar.isDateInToday(date) { return tr("今天") }
+        if calendar.isDateInYesterday(date) { return tr("昨天") }
+        let formatter = DateFormatter()
+        formatter.locale = I18n.locale
+        formatter.timeZone = BjmfScheduler.zone
+        formatter.setLocalizedDateFormatFromTemplate("MMMMdEEEE")
+        return formatter.string(from: date)
     }
 
     static func dayKey(_ date: Date) -> String {

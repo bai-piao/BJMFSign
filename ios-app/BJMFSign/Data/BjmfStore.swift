@@ -14,6 +14,7 @@ final class BjmfStore {
     private static let keyFavoriteLocations = "favorite_locations"
     private static let keyAccentColor = "accent_color"
     private static let keyThemeMode = "theme_mode"
+    private static let keyOnboardingDone = "onboarding_done"
     private static let maxLogs = 300
 
     init(defaults: UserDefaults = .standard) {
@@ -96,6 +97,7 @@ final class BjmfStore {
 
     func saveAccentColor(_ color: Int64) {
         defaults.set(Int(color), forKey: Self.keyAccentColor)
+        SharedStore.accentColor = color
     }
 
     // MARK: Appearance
@@ -106,6 +108,106 @@ final class BjmfStore {
 
     func saveThemeMode(_ mode: String) {
         defaults.set(mode, forKey: Self.keyThemeMode)
+    }
+
+    // MARK: Onboarding
+
+    /// 老用户（已有任务）升级后不再弹出首次引导。
+    var isOnboardingDone: Bool {
+        get { defaults.bool(forKey: Self.keyOnboardingDone) || !loadTasks().isEmpty }
+        set { defaults.set(newValue, forKey: Self.keyOnboardingDone) }
+    }
+
+    // MARK: Backup
+
+    func buildBackupJson() throws -> Data {
+        let tasks = try JSONSerialization.jsonObject(with: encoder.encode(loadTasks()))
+        let locations = try JSONSerialization.jsonObject(with: encoder.encode(loadFavoriteLocations()))
+        let root: [String: Any] = [
+            "format": BackupCrypto.format,
+            "version": BackupCrypto.version,
+            "platform": "ios",
+            "exportedAt": Clock.nowMillis(),
+            "tasks": tasks,
+            "favoriteLocations": locations,
+            "settings": [
+                "accentColor": loadAccentColor(),
+                "themeMode": loadThemeMode(),
+                "language": I18n.language,
+                "dynamicColor": false,
+            ] as [String: Any],
+        ]
+        return try JSONSerialization.data(withJSONObject: root, options: [.sortedKeys])
+    }
+
+    struct RestoreSummary {
+        var tasks: Int
+        var locations: Int
+    }
+
+    /// 用备份替换本机任务与位置收藏，并恢复界面设置。
+    func restoreBackupJson(_ data: Data) throws -> RestoreSummary {
+        guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              root["format"] as? String == BackupCrypto.format else {
+            throw BackupCrypto.Failure.invalidFile
+        }
+        let tasks = (root["tasks"] as? [[String: Any]] ?? []).compactMap(Self.task(from:))
+        let locations = (root["favoriteLocations"] as? [[String: Any]] ?? []).compactMap(Self.location(from:))
+        lock.lock()
+        encode(tasks.sorted { $0.updatedAt > $1.updatedAt }, key: Self.keyTasks)
+        encode(locations.sorted { $0.createdAt > $1.createdAt }, key: Self.keyFavoriteLocations)
+        lock.unlock()
+        if let settings = root["settings"] as? [String: Any] {
+            if let color = (settings["accentColor"] as? NSNumber)?.int64Value { saveAccentColor(color) }
+            if let mode = settings["themeMode"] as? String, !mode.isEmpty { saveThemeMode(mode) }
+            if let language = settings["language"] as? String, !language.isEmpty { I18n.language = language }
+        }
+        return RestoreSummary(tasks: tasks.count, locations: locations.count)
+    }
+
+    private static func int64(_ value: Any?) -> Int64? {
+        (value as? NSNumber)?.int64Value ?? (value as? String).flatMap { Int64($0) }
+    }
+
+    private static func string(_ value: Any?) -> String? {
+        if let text = value as? String { return text }
+        if let number = value as? NSNumber { return number.stringValue }
+        return nil
+    }
+
+    private static func task(from json: [String: Any]) -> BjmfTask? {
+        guard let id = int64(json["id"]), let name = string(json["name"]) else { return nil }
+        let now = Clock.nowMillis()
+        return BjmfTask(
+            id: id,
+            name: name,
+            classId: string(json["classId"]) ?? "",
+            cookie: string(json["cookie"]) ?? "",
+            lat: string(json["lat"]) ?? "",
+            lng: string(json["lng"]) ?? "",
+            acc: string(json["acc"])?.nilIfEmpty ?? "30",
+            wxKey: string(json["wxKey"]) ?? "",
+            qqKey: string(json["qqKey"]) ?? "",
+            times: (json["times"] as? [Any] ?? []).compactMap { string($0)?.nilIfEmpty },
+            dateStart: string(json["dateStart"])?.nilIfEmpty,
+            dateEnd: string(json["dateEnd"])?.nilIfEmpty,
+            enabled: (json["enabled"] as? Bool) ?? true,
+            createdAt: int64(json["createdAt"]) ?? now,
+            updatedAt: int64(json["updatedAt"]) ?? now
+        )
+    }
+
+    private static func location(from json: [String: Any]) -> FavoriteLocation? {
+        guard let id = int64(json["id"]),
+              let lat = string(json["lat"]),
+              let lng = string(json["lng"]) else { return nil }
+        return FavoriteLocation(
+            id: id,
+            name: string(json["name"]) ?? "",
+            lat: lat,
+            lng: lng,
+            createdAt: int64(json["createdAt"]) ?? Clock.nowMillis()
+        )
     }
 
     // MARK: Logs
