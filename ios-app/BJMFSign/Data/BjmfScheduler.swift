@@ -1,6 +1,8 @@
 import BackgroundTasks
 import Foundation
 import UserNotifications
+import UIKit
+import WidgetKit
 
 /// 定时签到调度。
 ///
@@ -30,7 +32,7 @@ final class BjmfScheduler {
     // MARK: Registration
 
     static func registerNotificationCategory() {
-        let action = UNNotificationAction(identifier: signActionIdentifier, title: "立即签到", options: [])
+        let action = UNNotificationAction(identifier: signActionIdentifier, title: tr("立即签到"), options: [])
         let category = UNNotificationCategory(identifier: notificationCategory, actions: [action], intentIdentifiers: [], options: [])
         UNUserNotificationCenter.current().setNotificationCategories([category])
     }
@@ -53,8 +55,8 @@ final class BjmfScheduler {
         guard task.enabled, let next = nextRun(for: task) else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "签到时间到：\(task.name)"
-        content.body = "点击通知或「立即签到」执行本次签到"
+        content.title = tr("签到时间到：{0}", task.name)
+        content.body = tr("点击通知或「立即签到」执行本次签到")
         content.sound = .default
         content.categoryIdentifier = Self.notificationCategory
         content.userInfo = [Self.taskIdKey: NSNumber(value: task.id)]
@@ -193,8 +195,45 @@ final class SignRunner {
         if summary, let wxKey = tasks.first(where: { !$0.wxKey.isEmpty })?.wxKey {
             try? await service.sendSummary(wxKey: wxKey, results: results)
         }
-        scheduler.scheduleAll(store.loadTasks())
+        let allTasks = store.loadTasks()
+        scheduler.scheduleAll(allTasks)
+        publishLastResult(results, tasks: allTasks)
+        if markAuto { await notifyResults(results) }
         return results
+    }
+
+    /// 写入 App Group 并刷新小组件。
+    private func publishLastResult(_ results: [SignResult], tasks: [BjmfTask]) {
+        guard let last = results.last else { return }
+        let failed = results.first { !SignStatus.isSuccess($0.status) }
+        let shown = failed ?? last
+        let next = tasks.filter(\.enabled).compactMap { scheduler.nextRun(for: $0) }.min()
+        SharedStore.saveLastResult(SharedStore.LastResult(
+            taskName: shown.taskName,
+            status: shown.status,
+            reason: Diagnostics.readableReason(status: shown.status, message: shown.message),
+            runAt: Clock.nowMillis(),
+            succeeded: results.filter { SignStatus.isSuccess($0.status) }.count,
+            total: results.count,
+            nextRunAt: next.map { Int64($0.timeIntervalSince1970 * 1000) }
+        ))
+        WidgetCenter.shared.reloadTimelines(ofKind: SharedStore.widgetKind)
+    }
+
+    /// 自动签到（后台刷新 / 通知按钮）完成后，用本地通知告知结果。
+    private func notifyResults(_ results: [SignResult]) async {
+        // 前台时界面会直接显示结果，不再重复推送。
+        let active = await MainActor.run { UIApplication.shared.applicationState == .active }
+        guard !active else { return }
+        for result in results {
+            let success = SignStatus.isSuccess(result.status)
+            let content = UNMutableNotificationContent()
+            content.title = success ? tr("{0} 签到成功", result.taskName) : tr("{0} 签到未完成", result.taskName)
+            content.body = Diagnostics.readableReason(status: result.status, message: result.message)
+            content.sound = success ? nil : .default
+            let request = UNNotificationRequest(identifier: "bjmf-result-\(result.taskId)", content: content, trigger: nil)
+            UNUserNotificationCenter.current().add(request)
+        }
     }
 
     /// 自动补签：执行窗口内到期但未执行的任务。

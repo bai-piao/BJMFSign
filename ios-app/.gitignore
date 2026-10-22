@@ -4,3 +4,4 @@ BJMFSign/Resources/Info.plist
 build/
 DerivedData/
 *.ipa
+BJMFSignWidget/Info.plist

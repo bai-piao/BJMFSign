@@ -1052,5 +1052,137 @@
   "颜色格式应为 #RRGGBB 或 #AARRGGBB": {
     "zh-Hant": "顏色格式應為 #RRGGBB 或 #AARRGGBB",
     "en": "Color must be #RRGGBB or #AARRGGBB"
+  },
+  "iOS 依靠通知提醒你签到：到点推送通知，点按即可签到；后台补签后也会告诉你结果。": {
+    "zh-Hant": "iOS 依靠通知提醒你簽到：到點推送通知，點按即可簽到；背景補簽後也會告訴你結果。",
+    "en": "iOS uses notifications to remind you: you'll get one at each run time and can tap it to sign in. Background catch-up runs also report their results."
+  },
+  "iOS 定时签到": {
+    "zh-Hant": "iOS 定時簽到",
+    "en": "iOS scheduled sign-in"
+  },
+  "上次签到结果": {
+    "zh-Hant": "上次簽到結果",
+    "en": "Last sign-in result"
+  },
+  "任务已保存，并已安排下一次签到提醒": {
+    "zh-Hant": "任務已儲存，並已安排下一次簽到提醒",
+    "en": "Task saved and next sign-in reminder scheduled"
+  },
+  "低电量模式": {
+    "zh-Hant": "低電量模式",
+    "en": "Low Power Mode"
+  },
+  "低电量模式会暂停后台刷新，请留意": {
+    "zh-Hant": "低電量模式會暫停背景重新整理，請留意",
+    "en": "Low Power Mode pauses background refresh"
+  },
+  "允许": {
+    "zh-Hant": "允許",
+    "en": "Allow"
+  },
+  "关闭表示不限制": {
+    "zh-Hant": "關閉表示不限制",
+    "en": "Off means no limit"
+  },
+  "再次完成扫码登录、通知权限和后台刷新设置": {
+    "zh-Hant": "再次完成掃碼登入、通知權限和背景重新整理設定",
+    "en": "Go through QR login, notifications and background refresh again"
+  },
+  "删除任务「{0}」？": {
+    "zh-Hant": "刪除任務「{0}」？",
+    "en": "Delete task \"{0}\"?"
+  },
+  "到达执行时间时会推送通知，点击通知或通知上的「立即签到」即可执行；系统也会在后台刷新时自动补签，打开 App 时会补签 30 分钟内错过的任务。请允许通知权限并开启「后台 App 刷新」。": {
+    "zh-Hant": "到達執行時間時會推送通知，點按通知或通知上的「立即簽到」即可執行；系統也會在背景重新整理時自動補簽，開啟 App 時會補簽 30 分鐘內錯過的任務。請允許通知權限並開啟「背景 App 重新整理」。",
+    "en": "You'll get a notification at each run time; tap it or its \"Sign in now\" button to run. The system also catches up during background refresh, and opening the app runs anything missed in the last 30 minutes. Allow notifications and turn on Background App Refresh."
+  },
+  "可截图后在微信中长按识别，或用另一台设备的微信扫描": {
+    "zh-Hant": "可截圖後在微信中長按識別，或用另一台裝置的微信掃描",
+    "en": "Take a screenshot and long-press it in WeChat, or scan it with WeChat on another device"
+  },
+  "后台 App 刷新": {
+    "zh-Hant": "背景 App 重新整理",
+    "en": "Background App Refresh"
+  },
+  "已启用": {
+    "zh-Hant": "已啟用",
+    "en": "Enabled"
+  },
+  "已开启": {
+    "zh-Hant": "已開啟",
+    "en": "On"
+  },
+  "开启「后台 App 刷新」后，系统会在后台自动补签；打开 App 时也会补签 30 分钟内错过的任务。": {
+    "zh-Hant": "開啟「背景 App 重新整理」後，系統會在背景自動補簽；開啟 App 時也會補簽 30 分鐘內錯過的任務。",
+    "en": "With Background App Refresh on, the system catches up in the background. Opening the app also runs anything missed in the last 30 minutes."
+  },
+  "成功 {0}/{1}": {
+    "zh-Hant": "成功 {0}/{1}",
+    "en": "{0}/{1} succeeded"
+  },
+  "显示上一次执行的结果和下次执行时间": {
+    "zh-Hant": "顯示上一次執行的結果和下次執行時間",
+    "en": "Shows the last result and the next run time"
+  },
+  "更多操作": {
+    "zh-Hant": "更多操作",
+    "en": "More actions"
+  },
+  "未开启，请在系统设置中打开": {
+    "zh-Hant": "未開啟，請在系統設定中開啟",
+    "en": "Off. Turn it on in Settings"
+  },
+  "正在处理": {
+    "zh-Hant": "正在處理",
+    "en": "Working"
+  },
+  "正在补签 {0} 个到期任务...": {
+    "zh-Hant": "正在補簽 {0} 個到期任務...",
+    "en": "Catching up {0} due tasks..."
+  },
+  "点击通知或「立即签到」执行本次签到": {
+    "zh-Hant": "點按通知或「立即簽到」執行本次簽到",
+    "en": "Tap the notification or \"Sign in now\" to run this sign-in"
+  },
+  "点按移除该时间": {
+    "zh-Hant": "點按移除該時間",
+    "en": "Tap to remove this time"
+  },
+  "状态": {
+    "zh-Hant": "狀態",
+    "en": "Status"
+  },
+  "登录、配置、签到、日志和定时提醒均在本机完成": {
+    "zh-Hant": "登入、配置、簽到、日誌和定時提醒均在本機完成",
+    "en": "Login, setup, sign-in, logs and reminders all happen on this device"
+  },
+  "签到时间到：{0}": {
+    "zh-Hant": "簽到時間到：{0}",
+    "en": "Time to sign in: {0}"
+  },
+  "签到未完成": {
+    "zh-Hant": "簽到未完成",
+    "en": "Sign-in not completed"
+  },
+  "签到点": {
+    "zh-Hant": "簽到點",
+    "en": "Sign-in point"
+  },
+  "精度": {
+    "zh-Hant": "精度",
+    "en": "Accuracy"
+  },
+  "自定义": {
+    "zh-Hant": "自訂",
+    "en": "Custom"
+  },
+  "该任务的定时提醒也会一并取消。": {
+    "zh-Hant": "該任務的定時提醒也會一併取消。",
+    "en": "Its scheduled reminders will be cancelled too."
+  },
+  "还没有执行记录": {
+    "zh-Hant": "還沒有執行記錄",
+    "en": "No runs yet"
   }
 }

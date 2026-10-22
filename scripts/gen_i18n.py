@@ -21,7 +21,7 @@ SOURCES = [
     (ROOT / "ios-app", "*.swift"),
 ]
 ANDROID_OUT = ROOT / "android-app/app/src/main/java/com/bjmf/sign/android/data/I18nTables.kt"
-IOS_OUT = ROOT / "ios-app/BJMFSign/Data/I18nTables.swift"
+IOS_OUT = ROOT / "ios-app/Shared/I18nTables.swift"
 LITERAL = re.compile(r'\btr\(\s*"((?:[^"\\]|\\.)*)"')
 
 
